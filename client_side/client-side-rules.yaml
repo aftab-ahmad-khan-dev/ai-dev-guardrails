@@ -1,0 +1,457 @@
+---
+meta:
+  category: client_side
+  title: Client-Side Rules
+  version: 2.0.0
+  updated: '2026-07-21'
+  rule_id_prefix: CS
+  purpose: Enforce clean, modular, scalable React + Tailwind frontends with a hand-crafted (non-AI) UI/UX feel. Paste into Cursor/Claude before generating frontend code.
+  usage: 'Instruct: "Follow every client-side rule below while generating code."'
+  stack:
+  - React
+  - Tailwind CSS
+  - Framer Motion
+  - GSAP
+  - React Helmet
+  source: AI Dev Rules Master Prompt Pack — Part 1
+rules:
+- id: CS-01
+  title: Code Organization & Componentization
+  status: complete
+  severity: high
+  summary: Keep the frontend modular, scalable, and easy to navigate. No file exceeds 400 LOC; pages orchestrate only; logic lives in hooks/services.
+  rules:
+  - Max file length — no file exceeds 400 LOC. Refactor before it happens, not after.
+  - Page files only orchestrate layout + data wiring. No business logic, no large inline JSX blocks.
+  - Each component has a single responsibility. Split any component rendering more than ~2 independent UI sections.
+  - Business/data logic goes into hooks/ (stateful) or services/ (API calls, pure functions), never inline in components.
+  - Group by feature/domain, not by file type.
+  do:
+  - Before generating code, estimate output size; if over 400 LOC, proactively split into components/hooks/services/utils.
+  - Co-locate page-private components under pages/<Feature>/components/.
+  - Promote shared UI to src/components/ once reused in 2+ places.
+  dont:
+  - God components that fetch data, manage state, and render 5 sections.
+  - Copy-pasted JSX blocks instead of extracting a reusable component.
+  - Business logic (calculations, transforms, validation) living inside JSX.
+  - Dump an entire feature into one file for convenience.
+  ai_directive: Estimate file size before generating. Never dump a whole feature into one file. Split into feature folders with components, hooks, and services.
+  example:
+    good: |-
+      src/pages/Dashboard/
+      ├── Dashboard.jsx
+      ├── components/{StatsCard,UserTable}.jsx
+      ├── hooks/useDashboardData.js
+      └── services/dashboardService.js
+- id: CS-02
+  title: State Management
+  status: complete
+  severity: high
+  summary: Prevent unpredictable state, prop-drilling, and re-render storms. Local first; global only when truly shared.
+  rules:
+  - Local first — useState/useReducer unless data is truly shared across distant components.
+  - Lift state only as high as the nearest common ancestor that needs it.
+  - Global store (Zustand/Redux/Context) only for auth/session, theme, cart/checkout, or data used by 3+ unrelated components.
+  - No prop drilling past 2 levels untouched — introduce Context or a store.
+  - Never store data in state that can be computed from existing state/props.
+  - Every async slice tracks { data, loading, error } consistently.
+  - Never mutate state directly; always return new references.
+  do:
+  - Keep form input values local to the form component.
+  - Use selectors for derived store data.
+  - Separate server-state (React Query/SWR) from UI-state.
+  dont:
+  - Duplicating server data into multiple stores.
+  - Storing derived/computed values as separate state.
+  - Using global state for form inputs local to one component.
+  ai_directive: Default to local state. Justify any global store. Keep async slices as { data, loading, error }. Never mutate state.
+  example:
+    good: |-
+      src/store/
+      ├── auth/{authSlice,authSelectors}.js
+      └── cart/{cartSlice,cartSelectors}.js
+- id: CS-03
+  title: API Integration & Data Fetching
+  status: complete
+  severity: high
+  summary: Keep data-fetching predictable, cached, and decoupled from UI via a single API layer and domain services.
+  rules:
+  - All HTTP calls go through one services/api client with base URL + interceptors. No raw fetch() in components.
+  - One service per domain (userService, orderService) exporting functions, not scattered endpoint strings.
+  - Use React Query/SWR (or equivalent) for caching, retries, and stale-while-revalidate when available.
+  - Normalize API errors to { message, code, status } at the interceptor level.
+  - Services fetch and return data; transformation/business rules live in hooks or utils.
+  - Never hardcode API URLs — read from environment config.
+  - Abort in-flight requests on unmount/param change to prevent race conditions.
+  do:
+  - Centralize auth header injection in interceptors.
+  - Document each service function next to the backend contract it calls.
+  dont:
+  - Fetch calls duplicated across components for the same endpoint.
+  - Hardcoded tokens or API keys in service files.
+  - Swallowing errors silently (empty catch blocks).
+  ai_directive: Route every HTTP call through the shared API client and domain services. Prefer React Query/SWR over manual useEffect fetch boilerplate. Never put secrets in services.
+- id: CS-04
+  title: Error Handling & Logging
+  status: complete
+  severity: high
+  summary: Fail gracefully and make issues traceable without leaking sensitive data.
+  rules:
+  - Wrap route-level and high-risk sections in React Error Boundaries with friendly fallback UI.
+  - Never show raw stack traces or backend error payloads to end users.
+  - Route all client error logging through one utility (utils/logger.js) so the sink can be swapped.
+  - Never log tokens, passwords, PII, or full request/response bodies containing user data.
+  - One shared notification system for success/error/warning — no ad-hoc alert().
+  - Every data-fetching hook must handle offline/timeout states, not just happy path.
+  - Retry/backoff for idempotent GETs; mutating POSTs generally do not auto-retry.
+  do:
+  - Provide loading, empty, and error UI for every data-driven view.
+  - Strip console.log from production builds via tooling.
+  dont:
+  - console.log left in production builds.
+  - Generic catch (e) {} blocks that hide failures.
+  - Logging entire user objects or auth tokens for debugging.
+  ai_directive: Generate error boundaries, friendly fallbacks, and a centralized logger. Never leak stacks or secrets to users or logs.
+- id: CS-05
+  title: Performance Optimization
+  status: complete
+  severity: high
+  summary: Keep the app fast on real-world devices and networks.
+  rules:
+  - Route-based lazy loading (React.lazy/dynamic import) for every top-level page.
+  - useMemo/useCallback/React.memo only where profiling shows real cost — not by default everywhere.
+  - Responsive images (srcset), lazy-load below-the-fold, modern formats (WebP/AVIF).
+  - Set a max bundle size per route (e.g. 200KB gzipped); CI fails if exceeded when tooling exists.
+  - Lists/tables over ~100 rows use windowing/virtualization.
+  - Prefer CSS transforms/opacity for animation over layout properties.
+  - Every added library must be justified against bundle-size cost.
+  do:
+  - Debounce high-frequency handlers (search, resize).
+  - Move heavy sync computation to a Web Worker when needed.
+  dont:
+  - Importing an entire icon/utility library when only a few exports are used.
+  - Re-rendering large lists on every keystroke without debouncing.
+  - Blocking the main thread with heavy synchronous computation.
+  ai_directive: Default to route-level code splitting. Memoize only when needed. Virtualize long lists. Justify every heavy dependency.
+- id: CS-06
+  title: Accessibility (a11y)
+  status: complete
+  severity: high
+  summary: Ensure the product is usable by people with disabilities and meets WCAG 2.1 AA.
+  rules:
+  - Semantic HTML first — button, nav, label before ARIA.
+  - Every interactive element keyboard reachable and operable.
+  - Modals/drawers trap focus and return it to the trigger on close.
+  - Text contrast minimum 4.5:1 (3:1 large text).
+  - Meaningful images have descriptive alt; decorative use alt="".
+  - Every input has an associated visible label (not placeholder-only).
+  - Async status updates announced via aria-live.
+  - Never convey information through color or motion alone.
+  do:
+  - Provide visible focus styles when customizing outlines.
+  - Honor prefers-reduced-motion for non-essential motion.
+  dont:
+  - div onClick as a button without role and keyboard handlers.
+  - Removing focus outlines without a visible alternative.
+  - Auto-playing motion/video without pause or reduced-motion check.
+  ai_directive: Produce accessible markup by default — semantics, labels, keyboard, focus traps, contrast, and live regions.
+- id: CS-07
+  title: SEO, Meta Tags & OG Images
+  status: complete
+  severity: high
+  summary: Every page is discoverable, correctly indexed, and shares beautifully on social platforms.
+  rules:
+  - Every route sets its own title, meta description, and canonical via React Helmet (or equivalent).
+  - Every shareable page includes og:title, og:description, og:image, og:url, twitter:card.
+  - Pixel-perfect 1200x630 OG image per platform/page in public/og/ (og-<page>.png) — not a stretched logo.
+  - 'Full favicon set: favicon.ico, 32x32, 16x16, apple-touch-icon, site.webmanifest.'
+  - Add JSON-LD structured data where relevant.
+  - Maintain sitemap.xml and correct robots.txt.
+  - One h1 per page; never skip heading levels for styling.
+  do:
+  - Unique title/description per route.
+  - Include theme-color and apple-touch-icon.
+  dont:
+  - Reusing one generic OG image across every page.
+  - Missing or duplicate title tags across routes.
+  - Empty, truncated, or keyword-stuffed meta descriptions.
+  - Shipping framework default favicons.
+  ai_directive: For every page/platform generate Helmet meta + OG/Twitter tags, a 1200x630 branded OG image, and a full favicon set.
+  example:
+    good: |-
+      <Helmet>
+        <title>Dashboard — Acme</title>
+        <meta name="description" content="Your Acme analytics at a glance." />
+        <meta property="og:image" content="/og/og-dashboard.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
+- id: CS-08
+  title: Responsive Design & Mobile-First
+  status: complete
+  severity: high
+  summary: Guarantee a consistent, polished experience across all devices and breakpoints.
+  rules:
+  - Mobile-first CSS — base for mobile, then min-width breakpoints (Tailwind default).
+  - 'Standard breakpoints only: sm 640 / md 768 / lg 1024 / xl 1280 / 2xl 1536.'
+  - Prefer rem/%/clamp for typography and spacing over fixed pixels.
+  - Touch targets at least 44x44px on touch devices.
+  - Verify at 375, 768, 1280, and 1920 widths minimum.
+  - No unintended horizontal scroll at any breakpoint.
+  - Media is fluid (max-width 100%) with responsive srcset/sizes.
+  do:
+  - Stack layouts on small screens; expand at md/lg.
+  - Provide tap equivalents for hover-only interactions.
+  dont:
+  - Fixed pixel widths on containers that should flex.
+  - Desktop-only hover with no touch equivalent.
+  - Separate mobile site trees duplicating desktop logic.
+  ai_directive: Generate mobile-first Tailwind layouts with standard breakpoints. Never cause horizontal scroll. Ensure touch-friendly targets.
+- id: CS-09
+  title: Animation & Motion (Framer Motion / GSAP)
+  status: complete
+  severity: medium
+  summary: Use motion purposefully to guide attention — Framer Motion for UI, GSAP for timelines/scroll.
+  rules:
+  - Every animation communicates state change, hierarchy, or feedback — never motion for its own sake.
+  - Micro-interactions 150–250ms; page/section transitions 300–500ms. Shared easing config.
+  - Always honor prefers-reduced-motion.
+  - Animate transform/opacity only — not width/height/top/left.
+  - Framer Motion for component/state animation; GSAP for complex timeline/scroll. Do not mix both on the same element.
+  - Reusable Framer variants live in animations/ — not inlined everywhere.
+  - Never delay critical above-the-fold content beyond ~300ms for decoration.
+  do:
+  - Ship 2–3 intentional motions on visually led pages.
+  - Throttle scroll-linked work; avoid per-pixel unthrottled handlers.
+  dont:
+  - Infinite looping animations near primary content.
+  - GSAP timelines with hardcoded pixel values that break on resize.
+  - Animating on every scroll pixel without rAF/throttling.
+  ai_directive: Add tasteful accessible motion. Honor reduced-motion. Use Framer Motion or GSAP per concern — not both on one element. Animate transform/opacity only.
+- id: CS-10
+  title: Form Handling & Validation
+  status: complete
+  severity: medium
+  summary: Keep forms consistent, accessible, and safe from bad input.
+  rules:
+  - One form library project-wide (e.g. React Hook Form) + schema validator (Zod/Yup) beyond 1–2 fields.
+  - Validation schemas live per form and align with server contracts where possible.
+  - Validate on blur/change and always re-validate on submit.
+  - Errors via aria-describedby and announced to screen readers.
+  - Disable submit and show loading during async submission.
+  - Clear password/payment fields from state immediately after submission.
+  - Shared components/form/ inputs — not one-off styled inputs per page.
+  do:
+  - Preserve user input on validation failure.
+  - Always re-validate security-relevant rules server-side.
+  dont:
+  - Client-side-only validation for security-relevant rules.
+  - Silently clearing a form on error.
+  - Submit-only validation with no earlier feedback on long forms.
+  ai_directive: Generate schema-validated accessible forms with pending submit states. Never treat client validation as the only security gate.
+- id: CS-11
+  title: Testing Standards
+  status: complete
+  severity: medium
+  summary: Catch regressions early with a clear test pyramid and behavior-focused tests.
+  rules:
+  - Majority unit, moderate integration, few critical E2E (Playwright/Cypress) for core flows.
+  - Co-locate Component.test.jsx next to Component.jsx.
+  - Query by role/text (Testing Library) — not internal state or class names.
+  - CI coverage floor on hooks/, services/, utils/ (e.g. 70%); UI glue may be exempt.
+  - Mock network at the boundary (MSW) rather than internal service functions when testing pages.
+  - Auth, checkout/payment, and primary conversion always have E2E coverage.
+  - Never use fixed sleep waits — wait for conditions/elements.
+  do:
+  - Cover happy path plus empty/error/validation failure.
+  - Keep tests deterministic.
+  dont:
+  - Snapshot tests as the only coverage for complex logic.
+  - Asserting on CSS class names instead of user-visible behavior.
+  - Skipping/disabling failing tests instead of fixing them.
+  ai_directive: Generate behavior-focused tests with Testing Library queries. Include error states. Mock network at the boundary. No flaky sleeps.
+- id: CS-12
+  title: Styling & Design System (Tailwind)
+  status: complete
+  severity: high
+  summary: Keep visual language consistent via tokens; avoid one-off drifting styles and generic AI aesthetics.
+  rules:
+  - Colors, spacing, typography, radii, shadows defined in tailwind.config theme — never hardcoded hex/px in components.
+  - Utility-first; extract a component (not @apply soup) once a pattern repeats 3+ times.
+  - Avoid arbitrary values (w-[437px]) by default; promote repeats to tokens.
+  - Use theme spacing scale exclusively.
+  - Dark mode via CSS variables/tokens, not duplicated component variants.
+  - Shared components/ui/ for buttons, inputs, cards, badges.
+  - Enforce class ordering via prettier-plugin-tailwindcss when available.
+  - Avoid cliché AI looks (purple-on-white gradients, cream+terracotta kits, glow pill spam) unless brand requires them.
+  do:
+  - Establish tokens before building screens.
+  - Cards only when they contain interaction.
+  dont:
+  - Copy-pasting long className strings across files.
+  - Hardcoded brand colors outside the token file.
+  - Inline style={{ }} for anything expressible via Tailwind.
+  ai_directive: Use design tokens and a shared UI kit. Avoid arbitrary values and generic AI aesthetics. Extract repeated utility patterns into components.
+- id: CS-13
+  title: Routing & Navigation
+  status: complete
+  severity: medium
+  summary: Keep navigation predictable, deep-linkable, and SEO/accessibility friendly.
+  rules:
+  - All routes declared in one routes/ config — not scattered Route definitions.
+  - Every top-level route is code-split via lazy import.
+  - Auth-gated routes use one shared ProtectedRoute wrapper.
+  - URLs reflect resource hierarchy (/orders/:id) — not query-string-only primary navigation.
+  - Route changes reset scroll to top unless intentionally preserved.
+  - Dedicated catch-all 404 and route-level error boundary.
+  - Active nav/breadcrumb derived from route config.
+  do:
+  - Reflect filters/pagination in the URL when shareable.
+  - Use the router for internal navigation.
+  dont:
+  - window.location.href for internal navigation.
+  - Critical UI state only in component state when it should be in the URL.
+  - Duplicated auth-check logic pasted into every protected page.
+  ai_directive: Centralize route config with lazy routes, one ProtectedRoute wrapper, 404/error routes, and meaningful URLs.
+- id: CS-14
+  title: Internationalization (i18n)
+  status: complete
+  severity: medium
+  summary: Make the app translation-ready and locale-safe from day one, even if only one language ships first.
+  rules:
+  - All user-facing text through t(key) — never inline literals in JSX.
+  - Namespaced translation files by feature/page — not one giant flat file.
+  - Dates, numbers, currency via Intl or locale-aware library.
+  - Use i18n plural rules API — not manual count === 1 ternary strings.
+  - Prefer logical CSS properties for RTL readiness.
+  - Always define a fallback locale.
+  - Semantic keys (checkout.submitButton) — not raw English as the key.
+  do:
+  - Keep locale files in a shared locales/ directory.
+  - Avoid concatenating translated fragments into sentences.
+  dont:
+  - Concatenating translated fragments (breaks grammar).
+  - Hardcoding MM/DD/YYYY app-wide.
+  - Storing translations inline in component files.
+  ai_directive: Route all user-facing strings through i18n keys with namespaces, Intl formatting, pluralization, and a fallback locale.
+- id: CS-15
+  title: Asset & Image Optimization
+  status: complete
+  severity: medium
+  summary: Minimize payload size and maximize load performance for static assets.
+  rules:
+  - Serve WebP/AVIF with fallbacks; never ship unoptimized raw design exports.
+  - Provide srcset/sizes so devices download only what they need.
+  - Below-the-fold images/iframes use loading=lazy; LCP/hero may be eager.
+  - SVG (SVGO-optimized) for icons/simple illustrations.
+  - Self-host fonts where possible, subset, font-display swap.
+  - Build-time image optimization (sharp/imagemin) — not raw commits.
+  - CDN delivery with proper cache headers when available.
+  do:
+  - Set width/height or aspect-ratio to prevent CLS.
+  - OG images at 1200x630 per CS-07.
+  dont:
+  - Committing multi-MB unoptimized images.
+  - Raster PNG where an SVG icon would work.
+  - Full-resolution hero images for mobile viewports.
+  ai_directive: Generate optimized responsive images with modern formats, lazy-loading for non-LCP, and explicit dimensions.
+- id: CS-16
+  title: Environment Configuration
+  status: complete
+  severity: critical
+  summary: Keep environment-specific values out of code and safely managed per deployment target. Client bundles are always public.
+  rules:
+  - All env-dependent values read from one config/env.js wrapping import.meta.env/process.env.
+  - ".env.example lists every client env var as placeholders and stays in sync."
+  - Only public-prefixed vars (VITE_, NEXT_PUBLIC_) may enter the client bundle.
+  - API secrets, private keys, DB credentials must never be referenced in client env.
+  - ".env.development/.staging/.production stay structurally identical (same keys)."
+  - Validate required env vars at build/startup and fail fast if missing.
+  do:
+  - Proxy secret-bearing third-party calls through the backend.
+  - Document each public var purpose.
+  dont:
+  - Committing real .env files with secrets.
+  - Reading process.env.X ad-hoc inside random components.
+  - Putting a payment secret in a client-exposed env var.
+  ai_directive: Centralize env behind config/env.js. Only public-prefixed vars in the client. Never emit secrets into the bundle. Fail fast on missing required vars.
+- id: CS-17
+  title: Code Review & Git Workflow
+  status: complete
+  severity: medium
+  summary: Keep history clean, reviewable, and safe to roll back.
+  rules:
+  - 'Branch naming: feature|fix|chore/<ticket>-short-desc.'
+  - One logical change per PR; split when >~400 changed LOC where feasible.
+  - 'Conventional commits: type(scope): message.'
+  - No direct pushes to main — PR + review + passing CI.
+  - Pre-commit lint/format/typecheck (Husky + lint-staged) when the project uses them.
+  - 'PR description: what, why, how tested, screenshots for UI.'
+  - Prefer squash-merge for linear main history when team policy allows.
+  do:
+  - Keep AI workspace files out of git (see security pack).
+  - Never commit dist/, .next/, node_modules/.
+  dont:
+  - Committing generated build artifacts.
+  - Force-pushing over shared branches others use.
+  - Merging with failing CI or unresolved blocking review comments.
+  ai_directive: Follow conventional commits, focused PRs, and protected main. Never commit build artifacts or AI workspace files.
+- id: CS-18
+  title: Component Library & Design Tokens
+  status: complete
+  severity: high
+  summary: Ensure UI consistency and reduce duplicated styling via one UI kit and token-driven theming.
+  rules:
+  - Buttons, inputs, modals, cards, badges, tooltips live in components/ui/ (Storybook when available).
+  - All colors/spacing/radii/shadows/type come from central design tokens consumed by Tailwind.
+  - Components expose variants (variant, size) rather than arbitrary className overrides for core styling.
+  - Before creating a new UI component, check the library; extend/compose rather than duplicate.
+  - Base components ship with correct ARIA/keyboard handling by default.
+  - Breaking changes to shared components are called out in the PR description.
+  do:
+  - Document usage for shared components.
+  - Compose primitives instead of forking.
+  dont:
+  - Three different Button implementations across features.
+  - Overriding shared internals with !important.
+  - Hardcoding a one-off color not in the token palette.
+  ai_directive: Reuse and extend components/ui/ with token-driven variants. Do not duplicate primitives or hardcode one-off colors.
+- id: CS-19
+  title: Analytics & Tracking
+  status: complete
+  severity: medium
+  summary: Collect useful product data without harming performance, privacy, or code cleanliness.
+  rules:
+  - All analytics through one services/analytics.js wrapper — never call gtag/mixpanel directly from components.
+  - Consistent noun_verb event names documented in a shared events dictionary.
+  - Never send raw emails, names, or payment details — use hashed/anonymized IDs.
+  - Load analytics only after cookie/consent where GDPR/CCPA requires it.
+  - Scripts load asynchronously and never block initial render.
+  - Guard against duplicate page-view fires on remount.
+  do:
+  - Keep an events dictionary in docs or code.
+  - Fail open for product UX if analytics is blocked.
+  dont:
+  - Scattering provider SDK calls across dozens of components.
+  - Logging full user objects as event metadata.
+  - Loading tracking scripts before consent is obtained.
+  ai_directive: Centralize analytics behind a service wrapper with consent gating, noun_verb events, and no PII in properties.
+- id: CS-20
+  title: PWA & Offline Support
+  status: complete
+  severity: medium
+  summary: Provide a resilient, installable experience when the network is unreliable.
+  rules:
+  - Complete manifest.json aligned with favicon/OG assets (name, icons, theme_color, display).
+  - 'Explicit SW strategies: cache-first for static assets; network-first with fallback for API data.'
+  - Dedicated offline page/state — not a blank screen.
+  - Versioned cache names so stale caches purge on deploy.
+  - Queue offline mutations and replay when online where applicable.
+  - Custom install prompts after engagement — not on first paint.
+  do:
+  - Invalidate sensitive/user-specific cached API data appropriately.
+  - Bump cache version on every production deploy.
+  dont:
+  - Caching sensitive API responses indefinitely without invalidation.
+  - Service worker that swallows fetch failures with no offline UI.
+  - Forgetting to bump cache version (users stuck on stale assets).
+  ai_directive: Ship a complete web manifest, versioned service-worker caching, offline fallback UI, and thoughtful install UX. Never cache sensitive data indefinitely.

@@ -141,3 +141,20 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# AI / editor workspace files — never commit (see security/SEC-04)
+.cursor/
+.cursorrules.local
+.claude/
+.claude.json
+.aider*
+.continue/
+.windsurf/
+
+# Editor / IDE local state
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+*.swp
+.DS_Store

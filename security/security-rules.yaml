@@ -1,0 +1,437 @@
+---
+meta:
+  category: security
+  title: Security Rules
+  version: 2.0.0
+  updated: '2026-07-21'
+  rule_id_prefix: SEC
+  purpose: Protect source, credentials, dependencies, and runtime. Refuse to generate security violations.
+  usage: 'Instruct: "Enforce every security rule below and refuse to generate violations."'
+  source: AI Dev Rules Master Prompt Pack — Part 3
+rules:
+- id: SEC-01
+  title: npm / Dependency Scanning
+  status: complete
+  severity: critical
+  summary: Prevent known-vulnerable or malicious packages from entering the codebase.
+  rules:
+  - Run npm audit --audit-level=high (or pnpm/yarn equivalent) on every PR; fail on high/critical.
+  - Lockfile always committed; CI uses npm ci / frozen lockfile — never npm install.
+  - New dependencies need a one-line PR justification.
+  - Dependabot/Renovate for patch/minor with CI; manual review for majors.
+  - Prefer packages with few transitive deps and active maintenance; avoid libs for <20 LOC trivialities.
+  - Supply-chain scanning (signatures, Socket, Snyk) beyond CVEs alone.
+  - Pin exact versions for auth/crypto packages.
+  do:
+  - Review lockfile diffs in PRs.
+  - Remove unused dependencies.
+  dont:
+  - Ignoring audits with --force without review.
+  - Installing from unverified sources without vetting.
+  - Auto-merging majors without tests.
+  ai_directive: Justify new deps, keep lockfiles, use npm ci, fail CI on high/critical audits, and pin security-sensitive packages.
+- id: SEC-02
+  title: Secrets & Credentials Management
+  status: complete
+  severity: critical
+  summary: No credential, API key, or token exposed in source, logs, or client bundles.
+  rules:
+  - Production secrets in a secrets manager / platform env — never committed files.
+  - env files gitignored; only .env.example with placeholders committed.
+  - Client-exposed prefixes (VITE_, NEXT_PUBLIC_) are public — never put real secrets behind them.
+  - Any credential that touches a public channel is compromised — rotate immediately.
+  - Least-privilege keys.
+  - CI masks secrets in logs.
+  - Pre-commit secret scanning (gitleaks/trufflehog).
+  do:
+  - Rotate on exposure before investigating fully.
+  - Scope keys per environment.
+  dont:
+  - Pasting real API keys into chats/tickets/docs.
+  - Reusing one key across dev/staging/prod.
+  - Committing .env temporarily (still in history).
+  ai_directive: Never emit real secrets. Use env/secrets managers, .env.example placeholders, rotate on any exposure, and keep secrets out of client prefixes.
+- id: SEC-03
+  title: Environment Variable Rules
+  status: complete
+  severity: critical
+  summary: Standardize how config/secrets flow between environments safely.
+  rules:
+  - Classify every env var as client-safe or server-only at definition time.
+  - Secret-bearing vars have no hardcoded fallback — fail to start if missing in production.
+  - Schema-validate required env at startup (zod/envalid).
+  - Distinct credentials per environment.
+  - Maintain a registry (docs/env.md) of every var, purpose, and public/secret.
+  - 'If a secret is committed, treat as leaked: rotate, then clean history if required.'
+  do:
+  - Fail fast with clear boot errors.
+  - Keep .env.example in sync.
+  dont:
+  - Hardcoding temporary fallback secrets that ship to production.
+  - Sharing one .env with production credentials across developers.
+  - Storing env vars in plaintext shared docs.
+  ai_directive: Classify env vars, validate at boot, no secret defaults, separate per environment, and document the registry.
+- id: SEC-04
+  title: ".gitignore & Never-Commit Rules"
+  status: complete
+  severity: high
+  summary: Prevent credentials, build output, and AI-assistant workspace data from reaching the repository.
+  rules:
+  - Baseline gitignore includes .env, node_modules, dist/build/.next, coverage, logs, OS noise.
+  - Never commit .cursor/, .claude/, .windsurf/, or AI session/context folders.
+  - Personal IDE settings stay out unless explicitly shared team tooling.
+  - CI greps PRs for disallowed paths (.env, .cursor, .claude, private keys) and fails.
+  - Onboarding audit existing history with gitleaks; remediate if needed.
+  do:
+  - Add ignores before first commit.
+  - Share team rules via reviewed docs/YAML — not by committing .cursor/.
+  dont:
+  - Committing .cursor/.claude for teammate context.
+  - gitignore exceptions for a secret file just this once.
+  - Assuming gitignore removes already-committed files.
+  ai_directive: Maintain a strong .gitignore covering secrets, builds, and AI workspace paths. Never stage .cursor/.claude/.env. Enforce in CI.
+  example:
+    good: |-
+      .env
+      .env.*
+      !.env.example
+      node_modules/
+      dist/
+      build/
+      .next/
+      .cursor/
+      .claude/
+      .windsurf/
+      *.log
+      .DS_Store
+- id: SEC-05
+  title: Code & Data Leak Prevention
+  status: complete
+  severity: critical
+  summary: Stop sensitive logic, credentials, and user data from leaking through code, logs, or client bundles.
+  rules:
+  - No hardcoded secrets as string literals — always env/secrets manager.
+  - Pricing rules, proprietary algorithms, and auth checks stay server-side.
+  - Sanitize error responses — no stacks, paths, SQL, or env details in production.
+  - Production source maps private (error tracker only) or not generated publicly.
+  - No open /debug or admin-bypass routes in production.
+  - PII minimization — return only fields the client needs.
+  - No TODO comments with real credentials, internal URLs, or security workarounds.
+  do:
+  - Keep confidential logic behind the API boundary.
+  - Review diffs for internal hostnames and secrets.
+  dont:
+  - Logging entire request/response with auth headers.
+  - console.log(process.env) anywhere.
+  - Client-only admin mode toggle without server permission checks.
+  ai_directive: Keep secrets and proprietary logic server-side. Sanitize errors, minimize PII in responses, and never leave debug bypasses in production.
+- id: SEC-06
+  title: Variable Naming Conventions
+  status: complete
+  severity: medium
+  summary: Naming that is consistent, unambiguous, and never accidentally exposes secret values.
+  rules:
+  - camelCase vars/functions; PascalCase components/classes; UPPER_SNAKE constants/env; kebab-case folders (component files match PascalCase).
+  - Booleans prefixed is/has/can/should.
+  - No ambiguous abbreviations (usr, tmpVal).
+  - Names containing secret/token/key/password/credential get extra review — never logged/committed/sent to client unintentionally.
+  - Never put actual secret values in names or comments.
+  - Collections plural; singular objects singular.
+  - Functions = verb + noun (getUser, validateEmail).
+  do:
+  - Use intent-revealing names.
+  - Distinguish public vs private config by name.
+  dont:
+  - tempPassword then logging the object.
+  - Generic data/obj/temp holding sensitive fields.
+  - Example credentials in names that look real.
+  ai_directive: Apply casing standards and intent-revealing names. Flag secret-sounding identifiers. Never embed secret values in names or comments.
+- id: SEC-07
+  title: Authentication & Authorization
+  status: complete
+  severity: critical
+  summary: Only the right users can access the right resources — enforced server-side every time.
+  rules:
+  - Server-side authorization always; client route guards are UX only.
+  - Short-lived access tokens + secure refresh; no long-lived standard sessions.
+  - 'Cookies: HttpOnly, Secure, SameSite=Strict or Lax as required.'
+  - Passwords hashed with bcrypt/argon2 + per-user salt.
+  - Least privilege per-resource; re-verify role on sensitive mutations.
+  - MFA for admin/staff accounts.
+  - Rate-limit login/reset/OTP; log repeated failures.
+  - Logout revokes server-side session/refresh — not only clears client cookie.
+  do:
+  - Never trust client-sent role/isAdmin.
+  - Prefer HttpOnly cookies when XSS risk is realistic.
+  dont:
+  - Trusting role from request body.
+  - JWTs in localStorage when XSS is a realistic risk without mitigation.
+  - Same signing secret for access and refresh without rotation capability.
+  ai_directive: Enforce server-side authn/authz with short-lived tokens, secure cookies, strong hashing, MFA for privileged accounts, and rate-limited auth endpoints.
+- id: SEC-08
+  title: Input Validation & Sanitization
+  status: complete
+  severity: critical
+  summary: Treat all external input as untrusted until proven otherwise.
+  rules:
+  - Validate on the server always with a schema.
+  - Whitelist allowed type/length/format/range — not blacklist-only.
+  - Explicit type coercion for security checks (===, typed IDs).
+  - 'File uploads: content sniffing, size limits, malware scan where accepted.'
+  - Reject early at API boundary with generic 4xx before business logic.
+  - Sanitize user HTML (DOMPurify) before render.
+  - Normalize emails/usernames before compare.
+  do:
+  - Share schemas with FE where possible.
+  - Reject unknown fields.
+  dont:
+  - Trusting client already validated flags.
+  - Regex-only blacklist for XSS/SQLi instead of parameterization + encoding.
+  - Arbitrary uploads without size/type limits.
+  ai_directive: Server-side whitelist schema validation, early reject, sanitize HTML, normalize identifiers, and constrain uploads.
+- id: SEC-09
+  title: SQL / NoSQL Injection Prevention
+  status: complete
+  severity: critical
+  summary: Database queries can never be manipulated by user input.
+  rules:
+  - Parameterized queries / ORM only — never string-concat user input into SQL.
+  - Raw query escape hatches require review and still use parameter binding.
+  - Strip/reject Mongo operator keys ($where, $gt, $ne) from user input unless explicitly validated.
+  - App DB user least privilege (no DROP/ALTER for standard service account).
+  - Validate/coerce ID/date/enum types before query.
+  - Never build dynamic table/column names from unvalidated user input.
+  do:
+  - Prefer query builders/ORM.
+  - Allowlist sort/filter fields.
+  dont:
+  - Template-string SQL with user input.
+  - Passing raw req.body into Mongo filters.
+  - Disabling ORM escaping for performance.
+  ai_directive: Use parameterized queries only. Guard NoSQL operators. Least-privilege DB users. Never interpolate user input into SQL or dynamic identifiers.
+- id: SEC-10
+  title: Cross-Site Scripting (XSS) Prevention
+  status: complete
+  severity: critical
+  summary: Prevent attacker-controlled scripts from executing in another user's browser session.
+  rules:
+  - Rely on framework auto-escaping (React JSX) by default.
+  - Sanitize before dangerouslySetInnerHTML / v-html with explicit allowlists.
+  - Ship strict CSP (script-src self; avoid unsafe-inline/eval where possible).
+  - Escape output contextually for HTML/URL/JS/CSS.
+  - 'Validate user URLs against http/https scheme allowlist — block javascript: URIs.'
+  - Isolate untrusted third-party widgets in sandboxed iframes.
+  do:
+  - Prefer text children over raw HTML.
+  - Tighten CSP iteratively.
+  dont:
+  - dangerouslySetInnerHTML with unsanitized input.
+  - Concatenating user input into href/src without validation.
+  - Disabling CSP broadly to fix script loading.
+  ai_directive: Keep auto-escaping on, sanitize any raw HTML path, enforce CSP, validate URLs, and sandbox untrusted embeds.
+- id: SEC-11
+  title: CSRF Protection
+  status: complete
+  severity: high
+  summary: Prevent malicious sites from triggering unwanted authenticated actions.
+  rules:
+  - CSRF tokens on state-changing requests for cookie-authenticated sessions.
+  - SameSite=Lax or Strict as baseline.
+  - Use well-tested CSRF middleware (synchronizer or double-submit).
+  - For Bearer APIs, require custom headers as additional mitigation where applicable.
+  - Step-up re-auth for password change, payment updates, account deletion.
+  - Never use GET for state-changing actions.
+  do:
+  - Document CSRF model for pure Bearer APIs.
+  - Combine SameSite + tokens for cookie sessions.
+  dont:
+  - Referer header alone as CSRF protection.
+  - Exempting convenience routes without review.
+  - Destructive GET links.
+  ai_directive: Protect cookie-authenticated state changes with CSRF tokens and SameSite cookies. Re-auth for high-risk actions. No state-changing GETs.
+- id: SEC-12
+  title: Rate Limiting & DDoS Protection
+  status: complete
+  severity: high
+  summary: Protect the application from abuse, brute force, and overload.
+  rules:
+  - Global + stricter limits; stricter on login/reset/OTP/checkout.
+  - Edge protection (Cloudflare/WAF/Shield) in front of the app.
+  - Proven algorithm + shared store (Redis) for multi-instance.
+  - Return 429 with Retry-After.
+  - Account lockout with backoff + alerting after repeated failures.
+  - Tighter limits on expensive compute/email endpoints.
+  do:
+  - Combine IP with user/session identifiers where possible.
+  - Alert on sustained abuse.
+  dont:
+  - App-layer-only limiting with no edge protection.
+  - IP-only limits causing NAT false positives without mitigation.
+  - Unlimited password-reset/OTP endpoints.
+  ai_directive: Apply layered rate limits and edge DDoS protection. Return 429 with Retry-After. Lock out abusive auth attempts.
+- id: SEC-13
+  title: CORS Configuration
+  status: complete
+  severity: high
+  summary: Control exactly which origins can call the API from a browser.
+  rules:
+  - Explicit origin allowlist per environment — never * for authenticated/cookie APIs.
+  - Never combine wildcard origin with credentials true.
+  - Minimal allowed methods/headers.
+  - Environment-specific allowlists — staging domains not trusted in production.
+  - Reasonable Access-Control-Max-Age for preflight caching.
+  do:
+  - Read allowlist from env.
+  - Fail closed on unexpected Origin for credentialed APIs.
+  dont:
+  - Access-Control-Allow-Origin * on authenticated APIs.
+  - Reflecting Origin unconditionally.
+  - Leaving wildcard/dev CORS in production.
+  ai_directive: Configure explicit CORS allowlists from env. Never pair wildcard origin with credentials. Keep methods/headers minimal.
+- id: SEC-14
+  title: Logging & Audit Trail
+  status: complete
+  severity: high
+  summary: Traceability for security events without exposing sensitive data.
+  rules:
+  - Structured JSON logs with timestamp, level, service, requestId, userId where safe.
+  - Separate append-only audit log for logins, permission changes, exports, admin actions, failed auth.
+  - Redact passwords/tokens/card numbers at the logging-library level.
+  - Correlation IDs across logs and downstream calls.
+  - Retention policy + access-controlled production logs.
+  - Review third-party log sinks for PII/secret leakage before enabling.
+  do:
+  - Log security-meaningful events.
+  - Audit who can read production logs.
+  dont:
+  - Logging full bodies for password/token/payment endpoints.
+  - console.log as the production logging pipeline.
+  - Broad log access without justification.
+  ai_directive: Use structured logs with redaction, correlation IDs, and a separate security audit trail. Control log access and sinks.
+- id: SEC-15
+  title: Encryption & Data at Rest
+  status: complete
+  severity: critical
+  summary: Protect stored data even if underlying storage is compromised.
+  rules:
+  - Encrypt sensitive fields at rest (app or DB level).
+  - TLS everywhere in transit — including service↔DB in production.
+  - Keys via KMS/Vault with rotation — never hardcoded or stored beside ciphertext.
+  - Backups encrypted too.
+  - Field-level encryption for high-risk fields (SSN, etc.).
+  - Prefer tokenization (Stripe) over storing raw payment data.
+  do:
+  - Enforce HTTPS redirects.
+  - Minimize stored sensitive data.
+  dont:
+  - Storing raw card numbers.
+  - Disk encryption alone for highly sensitive fields.
+  - Keys in the same table as encrypted data.
+  ai_directive: TLS everywhere, encrypt sensitive data and backups, manage keys via KMS, and prefer tokenization over storing raw payment data.
+- id: SEC-16
+  title: Third-Party API & Integration Security
+  status: complete
+  severity: high
+  summary: Ensure external integrations do not become the weakest link.
+  rules:
+  - Secret-key third-party calls from the server only — never embedded client keys.
+  - Verify webhook signatures/HMAC before processing.
+  - Timeouts and circuit breakers on outbound calls.
+  - Least-privilege OAuth scopes.
+  - Documented owner + rotation plan per vendor credential.
+  - Validate third-party response shapes before use.
+  do:
+  - Proxy sensitive SDKs through backend.
+  - Sandbox credentials in non-prod.
+  dont:
+  - Embedding payment secret keys in client code.
+  - Processing unsigned webhooks.
+  - Granting full admin scopes when read-only suffices.
+  ai_directive: Call secret APIs from the server, verify webhooks, set timeouts/circuit breakers, minimize scopes, and validate vendor responses.
+- id: SEC-17
+  title: CI/CD Pipeline Security
+  status: complete
+  severity: critical
+  summary: Keep the build/deploy pipeline itself from becoming an attack vector.
+  rules:
+  - Least-privilege CI secrets scoped per pipeline/environment.
+  - Production deploys only from protected branches after reviews + checks.
+  - No secrets inline in pipeline YAML — reference the secret store.
+  - Build once, sign/checksum, promote immutable artifacts.
+  - SAST + dependency scanning as required blocking steps.
+  - Fork PRs never get production secrets by default.
+  - CI config changes go through the same PR review as app code.
+  do:
+  - Prefer OIDC short-lived cloud creds.
+  - Mask secrets in logs.
+  dont:
+  - Root/admin cloud keys as CI secrets.
+  - Fork PRs with production secret access.
+  - Skipping security scans to speed up the pipeline.
+  ai_directive: Scope CI secrets, protect production deploys, scan in pipeline, promote immutable artifacts, and never expose secrets to fork PRs.
+- id: SEC-18
+  title: Docker & Container Security
+  status: complete
+  severity: high
+  summary: Keep container images and runtime configuration hardened.
+  rules:
+  - Minimal base images (slim/distroless/alpine).
+  - Non-root USER.
+  - Multi-stage builds so build tools/secrets never hit final image.
+  - No .env or secrets copied into image layers — inject at runtime.
+  - Scan images (Trivy/Grype) in CI; block critical vulns.
+  - Pin base tags/digests — not latest.
+  - Set CPU/memory limits.
+  do:
+  - npm ci in build stage with lockfile.
+  - Use .dockerignore for secrets/.git.
+  dont:
+  - FROM node:latest in production.
+  - Running as root.
+  - COPY .env into the image.
+  ai_directive: Generate multi-stage non-root pinned Dockerfiles with no baked secrets, image scanning, and resource limits.
+- id: SEC-19
+  title: Deployment Security (Multi-Platform)
+  status: complete
+  severity: critical
+  summary: Consistent hardening across AWS EC2, DigitalOcean, Vercel, cPanel, Railway, and Render.
+  rules:
+  - Secrets via platform env/secret store — never committed files.
+  - HTTPS enforced; HTTP redirected.
+  - Least-privilege deploy credentials scoped to the project/service.
+  - Separate prod/staging/preview DBs and credentials completely.
+  - 'EC2: IAM roles not long-lived keys; tight security groups; key-based SSH; patched OS.'
+  - 'DigitalOcean: firewalls; backups; managed DB on private networking.'
+  - 'Vercel: mark Sensitive env vars; separate Preview vs Production scope; use edge protections.'
+  - 'cPanel: disable unused services; current software; SFTP not FTP; no chmod 777; 2FA on account.'
+  - 'Railway: project-scoped tokens; private networking; resource limits.'
+  - 'Render: environment groups; auto-deploy from protected branches; private services for internals.'
+  do:
+  - Never expose databases to the public internet.
+  - Never share prod secrets with preview/staging.
+  dont:
+  - Password SSH as shared root on EC2.
+  - Public DB for convenience.
+  - Same API keys across production and preview.
+  ai_directive: Enforce HTTPS, platform secrets, least-privilege deploy creds, and fully separate environments. Apply the platform-specific hardening notes for the target host.
+- id: SEC-20
+  title: Incident Response & Security Monitoring
+  status: complete
+  severity: high
+  summary: Detect issues quickly and respond in a structured, repeatable way.
+  rules:
+  - Centralized alerts for failed-login spikes, unusual admin activity, error spikes.
+  - 'Written incident runbook: who to notify, how to rotate, how to communicate, how to post-mortem.'
+  - Rotate first on suspected compromise — do not wait for confirmation.
+  - Blameless post-mortems focused on system fixes.
+  - Uptime/APM monitoring for anomalies.
+  - Regular access reviews; revoke on offboarding immediately.
+  - Periodically test backup restores.
+  do:
+  - Keep runbooks short and actionable.
+  - Document RPO/RTO with backups.
+  dont:
+  - Rotating leaked credentials days later after confirmation.
+  - Leaving former contributors with prod access.
+  - No documented incident process.
+  ai_directive: Alert on security anomalies, rotate credentials immediately on suspicion, maintain runbooks and blameless post-mortems, review access, and test restores.
