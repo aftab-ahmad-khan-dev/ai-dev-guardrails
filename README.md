@@ -245,6 +245,16 @@ rules:
 | [server_side](server_side/README.md) | `SS` | 20 | Layers, REST, auth, jobs, migrations |
 | [security](security/README.md) | `SEC` | 20 | Confidentiality, AI safety, injection |
 | [devops](devops/README.md) | `OPS` | 20 | CI/CD, platforms, pipelines |
+| [pipelines](devops/pipelines/README.md) | Actions | 6 starters | Platform deploy workflow templates |
+
+Each category folder README includes a thematic `banner.jpg` for GitHub browsing.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).  
+Copyright (c) 2026 Aftab Ahmad Khan.
 
 ---
 

@@ -107,6 +107,8 @@
 | ID | Task | Priority | Status | Completed | Notes |
 |----|------|----------|--------|-----------|-------|
 | D-001 | Publish repo URL on Rules.md and README | high | `done` | 2026-07-21 | github.com/aftab-ahmad-khan-dev/ai-dev-guardrails |
+| D-002 | Update LICENSE with project + repo attribution | medium | `done` | 2026-07-21 | MIT · Aftab Ahmad Khan · 2026 |
+| D-003 | Add thematic banners to each folder README | medium | `done` | 2026-07-21 | client/server/security/devops/pipelines |
 
 ---
 
@@ -122,5 +124,6 @@
 
 | Date | Version | Change |
 |------|---------|--------|
+| `2026-07-21` | `2.2.0` | LICENSE attribution; folder README banners |
 | `2026-07-21` | `2.2.0` | SRS introduced; rules & skills workflow; v2.2.0 tasks completed |
 | `2026-07-21` | `2.1.0` | Repo URL added to Rules.md and README |

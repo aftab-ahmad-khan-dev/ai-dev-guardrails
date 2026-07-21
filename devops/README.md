@@ -1,5 +1,7 @@
 # devops — CI/CD & Deployment Rule Pack
 
+![DevOps — commit to build to test to deploy pipeline](banner.jpg)
+
 Rules and platform playbooks for **AWS EC2, DigitalOcean, Vercel, cPanel,
 Railway, Render**, plus Docker, Actions, and reliability practices.
 

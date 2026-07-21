@@ -1,5 +1,7 @@
 # Pipeline templates
 
+![Pipelines — lint, test, build, deploy workflow templates](banner.jpg)
+
 Minimal, safe GitHub Actions starters from the Master Prompt Pack (Part 4).
 
 | File | Platform | Required secrets |

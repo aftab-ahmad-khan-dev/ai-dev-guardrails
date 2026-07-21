@@ -1,5 +1,7 @@
 # server_side — Backend Rule Pack
 
+![Server Side — layered Controllers, Services, Models, Routes, database](banner.jpg)
+
 Rules for extending an **existing API boilerplate** without changing its
 architecture. The prime directive: *extend the boilerplate, never replace it*.
 

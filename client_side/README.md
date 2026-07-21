@@ -1,5 +1,7 @@
 # client_side — Frontend Rule Pack
 
+![Client Side — modular React UI, responsive layouts, motion](banner.jpg)
+
 Rules for building **clean, modular, scalable React + Tailwind** frontends with a
 non-AI, hand-crafted UI/UX feel. Paste [`client-side-rules.yaml`](client-side-rules.yaml)
 into your AI tool before generating UI code.

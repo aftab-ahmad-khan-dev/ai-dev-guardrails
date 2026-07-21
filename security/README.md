@@ -1,5 +1,7 @@
 # security — Security Rule Pack
 
+![Security — shield, vault, and leak prevention for code and secrets](banner.jpg)
+
 Rules for keeping code, credentials, and dependencies safe. Covers dependency
 scanning, secrets hygiene, **confidential code & IP theft prevention**,
 **AI-assistant mistake prevention**, injection, authn/authz, and deployment hardening.
