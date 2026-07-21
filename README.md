@@ -3,6 +3,7 @@
 Reusable rules for **Cursor**, **Claude**, **Copilot**, and any AI coding assistant.  
 Keep code clean, modular, secure, and consistent — without forcing rules that do not apply to your project.
 
+**Repository:** https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails  
 **Version:** 2.1.0
 
 ---

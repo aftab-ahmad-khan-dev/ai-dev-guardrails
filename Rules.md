@@ -1,6 +1,7 @@
 # Rules.md — AI Development Rules (All-in-One)
 
-> **Version:** 2.1.0 · **Updated:** 2026-07-21
+> **Version:** 2.1.0 · **Updated:** 2026-07-21  
+> **Repository:** https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails
 > 
 > Single-file reference for Cursor, Claude, Copilot, and project `.cursor/rules`.
 > For **how to apply rules by project type** and the **compliance report template**, see [README.md](README.md).
