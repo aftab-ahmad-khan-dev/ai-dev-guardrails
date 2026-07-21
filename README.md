@@ -1,4 +1,4 @@
-# utils — AI Development Rules
+# Ai-dev-guardrails — AI Development Rules
 
 Reusable rules for **Cursor**, **Claude**, **Copilot**, and any AI coding assistant.  
 Keep code clean, modular, secure, and consistent — without forcing rules that do not apply to your project.
