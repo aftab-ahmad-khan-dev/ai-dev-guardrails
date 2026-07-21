@@ -363,6 +363,8 @@ rules:
   - All env-dependent values read from one config/env.js wrapping import.meta.env/process.env.
   - ".env.example lists every client env var as placeholders and stays in sync."
   - Only public-prefixed vars (VITE_, NEXT_PUBLIC_) may enter the client bundle.
+  - Public-prefixed values are still exposed to every browser user; never describe them as secured, hidden, or protected by .env.
+  - Tracking/config identifiers (Meta Pixel IDs, Clarity project IDs, GA measurement IDs, Sentry DSNs, map tokens) come from validated client-safe env vars with placeholder-only examples — never real source literals or production fallback values.
   - API secrets, private keys, DB credentials must never be referenced in client env.
   - ".env.development/.staging/.production stay structurally identical (same keys)."
   - Validate required env vars at build/startup and fail fast if missing.
@@ -373,7 +375,8 @@ rules:
   - Committing real .env files with secrets.
   - Reading process.env.X ad-hoc inside random components.
   - Putting a payment secret in a client-exposed env var.
-  ai_directive: Centralize env behind config/env.js. Only public-prefixed vars in the client. Never emit secrets into the bundle. Fail fast on missing required vars.
+  - 'Using import.meta.env.VITE_META_PIXEL_ID || "real-production-id" or arrays of literal provider IDs; these values ship in the bundle.'
+  ai_directive: Centralize env behind config/env.js. Treat every client env value as public, flag real hardcoded IDs/fallbacks, and never claim VITE_/NEXT_PUBLIC_ values are secured. Keep secrets server-side and fail fast on missing config.
 - id: CS-17
   title: Code Review & Git Workflow
   status: complete
@@ -385,6 +388,8 @@ rules:
   - 'Conventional commits: type(scope): message.'
   - No direct pushes to main — PR + review + passing CI.
   - Pre-commit lint/format/typecheck (Husky + lint-staged) when the project uses them.
+  - 'A pre-push hook/script runs the applicable local gate before network push: tests, lint/typecheck, dependency audit, secret scan, client-exposure scan, and build when configured.'
+  - Failed tests or high/critical findings block push; fix locally and rerun rather than bypassing hooks.
   - 'PR description: what, why, how tested, screenshots for UI.'
   - Prefer squash-merge for linear main history when team policy allows.
   do:
@@ -394,7 +399,8 @@ rules:
   - Committing generated build artifacts.
   - Force-pushing over shared branches others use.
   - Merging with failing CI or unresolved blocking review comments.
-  ai_directive: Follow conventional commits, focused PRs, and protected main. Never commit build artifacts or AI workspace files.
+  - Pushing first and waiting for remote CI to reveal failures the local gate can detect.
+  ai_directive: Follow conventional commits, focused PRs, and protected main. Before every push, run and report the local test/security gate; fix failures before pushing. Never bypass hooks or commit build artifacts/AI workspace files.
 - id: CS-18
   title: Component Library & Design Tokens
   status: complete
@@ -422,6 +428,8 @@ rules:
   summary: Collect useful product data without harming performance, privacy, or code cleanliness.
   rules:
   - All analytics through one services/analytics.js wrapper — never call gtag/mixpanel directly from components.
+  - Provider/project IDs are public once bundled, not secrets; load them from documented client-safe env vars.
+  - No real tracking IDs as source literals, fallback strings, or hardcoded arrays. Missing IDs disable that provider or fail validation according to policy.
   - Consistent noun_verb event names documented in a shared events dictionary.
   - Never send raw emails, names, or payment details — use hashed/anonymized IDs.
   - Load analytics only after cookie/consent where GDPR/CCPA requires it.
@@ -434,7 +442,9 @@ rules:
   - Scattering provider SDK calls across dozens of components.
   - Logging full user objects as event metadata.
   - Loading tracking scripts before consent is obtained.
-  ai_directive: Centralize analytics behind a service wrapper with consent gating, noun_verb events, and no PII in properties.
+  - Treating a Meta Pixel ID, Clarity project ID, GA measurement ID, or similar identifier as secured because import.meta.env supplies it.
+  - Shipping production tracking IDs as env.VALUE fallback literals.
+  ai_directive: Centralize analytics behind a consent-gated wrapper. Treat client tracking IDs as public configuration, require env-only values with no real fallback literals, and flag exposed hardcoded provider IDs.
 - id: CS-20
   title: PWA & Offline Support
   status: complete

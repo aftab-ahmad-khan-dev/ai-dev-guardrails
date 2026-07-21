@@ -43,6 +43,7 @@ rules:
   - Least-privilege keys.
   - CI masks secrets in logs.
   - Pre-commit secret scanning (gitleaks/trufflehog).
+  - Pre-push scanning inspects source/bundles for hardcoded client configuration and tracking identifiers; report public IDs as exposed configuration even when they are not credentials.
   - Name env/secrets with SCREAMING_SNAKE by purpose (JWT_SECRET) — never embed real secret values in names or comments.
   do:
   - Rotate on exposure before investigating fully.
@@ -59,7 +60,9 @@ rules:
   summary: Standardize how config/secrets flow between environments safely.
   rules:
   - Classify every env var as client-safe or server-only at definition time.
+  - Client-safe means intentionally public, not secured; record exposure and purpose in the env registry.
   - Secret-bearing vars have no hardcoded fallback — fail to start if missing in production.
+  - Client-safe production identifiers have no real source-code fallback; use deployment env values and placeholder-only .env.example entries.
   - Schema-validate required env at startup (zod/envalid).
   - Distinct credentials per environment.
   - Maintain a registry (docs/env.md) of every var, purpose, and public/secret.
@@ -69,6 +72,7 @@ rules:
   - Keep .env.example in sync.
   dont:
   - Hardcoding temporary fallback secrets that ship to production.
+  - Hardcoding tracking/project IDs in client config or arrays, including fallback literals after VITE_* / NEXT_PUBLIC_*.
   - Sharing one .env with production credentials across developers.
   - Storing env vars in plaintext shared docs.
   ai_directive: Classify env vars, validate at boot, no secret defaults, separate per environment, and document the registry.
@@ -402,6 +406,7 @@ rules:
   - No secrets inline in pipeline YAML — reference the secret store.
   - Build once, sign/checksum, promote immutable artifacts.
   - SAST + dependency scanning as required blocking steps.
+  - 'Mirror the applicable gate locally before every push: tests, lint/typecheck, dependency audit, secret scan, client-exposure scan, and build when configured.'
   - Fork PRs never get production secrets by default.
   - CI config changes go through the same PR review as app code.
   do:
@@ -411,7 +416,9 @@ rules:
   - Root/admin cloud keys as CI secrets.
   - Fork PRs with production secret access.
   - Skipping security scans to speed up the pipeline.
-  ai_directive: Scope CI secrets, protect production deploys, scan in pipeline, promote immutable artifacts, and never expose secrets to fork PRs.
+  - Treating remote CI as the first time tests or mandatory security scans run.
+  - Bypassing the local gate with --no-verify without documented emergency approval.
+  ai_directive: Scope CI secrets, protect production deploys, require local pre-push tests/security scans plus remote CI, promote immutable artifacts, and never expose secrets to fork PRs.
 - id: SEC-18
   title: Docker & Container Security
   status: complete

@@ -35,4 +35,11 @@ into your AI tool before generating UI code.
 | CS-19 | Analytics & tracking | medium |
 | CS-20 | PWA & offline support | medium |
 
+## Required pre-push and client-exposure checks
+
+- Before every push, run the applicable local tests, lint/typecheck, dependency audit, secret scan, client-exposure scan, and build. Fix failures before pushing; CI repeats the gate.
+- `VITE_*` and `NEXT_PUBLIC_*` are public browser values—not secured secrets.
+- Never hardcode production Meta Pixel, Clarity, GA, Sentry, or similar IDs as literals, fallback strings, or arrays. Use validated client-safe deployment env vars with placeholder-only examples.
+- Keep actual credentials and privileged vendor operations server-side; consent-gate all tracking.
+
 > **Status:** All 20 rules are fully written (`status: complete`).

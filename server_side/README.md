@@ -38,4 +38,10 @@ Database · Startup · Templates
 | SS-19 | Performance & scalability | high |
 | SS-20 | API documentation | medium |
 
+## Required pre-push and marketing-config boundary
+
+- Before every push, run the applicable local tests, lint/typecheck, dependency audit, secret scan, client-exposure scan, and build. Fix failures locally before pushing; CI repeats the gate.
+- Keep conversion API tokens, webhook secrets, administrative analytics credentials, and privileged vendor calls server-only.
+- Expose only intentionally public provider/project IDs to clients through validated deployment configuration—never secret credentials or real hardcoded fallback values.
+
 > **Status:** All 20 rules are fully written (`status: complete`).

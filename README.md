@@ -110,7 +110,7 @@ Do not delete task history; use `cancelled` with a reason. If `SRS.md` is missin
 5. **Refuse violations** — No secrets in code, no `.cursor/` in commits, no proprietary logic in client bundles.
 6. **Estimate file size** — Split before 400 LOC (CS-01 / SS-01).
 7. **Update `SRS.md`** — mark finished tasks `done`; extend by version/date if scope grew.
-8. **Run applicable scans** — See Rules §6 and report results.
+8. **Before push, run the local gate** — tests, lint/typecheck, dependency audit, secret scan, client-exposure scan, and build where configured. Fix failures before pushing.
 9. **Emit compliance report** — After implementation or review (template below); include SRS task IDs in **Scope**.
 
 ### Always-on (every project)
@@ -120,6 +120,8 @@ Do not delete task history; use `cancelled` with a reason. If `SRS.md` is missin
 - Never commit AI workspace files (SEC-04)
 - Confidential code & AI mistake prevention (SEC-05, SEC-06)
 - Dependency / secret scanning where `package.json` exists (SEC-01, Rules §6)
+- Local pre-push test/security gate; remote CI is a second gate, not the first feedback loop
+- Treat `VITE_*` / `NEXT_PUBLIC_*` as public. Flag hardcoded analytics/tracking IDs and real fallback literals.
 
 ### Common-only (no backend)
 
@@ -162,6 +164,7 @@ Use clear status icons and honest `N/A` when a category does not apply.
 │ Security — injection/XSS    │ WARN     │ Review 1 raw HTML path     │
 │ Security scan — deps        │ PASS     │ npm audit: 0 high/critical │
 │ Security scan — secrets     │ PASS     │ gitleaks: clean            │
+│ Client config exposure      │ PASS     │ No literal tracking IDs    │
 │ Security scan — lint/test   │ PASS     │ lint + test green          │
 │ DevOps / CI                 │ N/A      │ No pipeline in repo yet    │
 │ DevOps — platform           │ N/A      │ Not deploying this task    │
@@ -176,6 +179,8 @@ Status legend:
 ── Scans executed ────────────────────────────────────────────────
   [✓] Secret scan          (gitleaks / manual diff review)
   [✓] Dependency audit     (npm audit --audit-level=high)
+  [✓] Client exposure scan (no hardcoded tracking IDs/fallbacks)
+  [✓] Local pre-push gate  (tests + scans passed before push)
   [✓] .gitignore / AI paths (SEC-04)
   [ ] SAST                 (not configured)
   [ ] Docker image scan    (N/A — no Dockerfile)
@@ -212,9 +217,13 @@ Full checklist: **[Rules.md §6 — Security Scan](Rules.md#6-security-scan-chec
 | When | Minimum scans |
 |------|----------------|
 | Every commit | No staged `.env`, `.cursor/`, `.claude/`, `*.pem` |
-| Pre-push / PR | `npm audit --audit-level=high`, lint, tests |
+| **Every pre-push (local)** | Tests, lint/typecheck, dependency audit, gitleaks, client-exposure scan, build where configured |
 | PR (recommended) | `gitleaks detect`, lockfile review |
 | Pre-deploy | Full CI green, secrets in platform store, HTTPS |
+
+The pre-push gate must print results locally and block the push on failed tests or high/critical findings. Fix and rerun before pushing; do not bypass it with `--no-verify` except under documented emergency approval. CI must repeat the checks.
+
+**Client configuration warning:** `VITE_*` and `NEXT_PUBLIC_*` values are embedded in the browser bundle. Meta Pixel IDs, Clarity project IDs, GA measurement IDs, and similar identifiers are public—not secured by an env file. Keep production values out of source literals and fallback arrays, load them from validated client-safe deployment env vars, and keep actual tokens/secrets server-only.
 
 ---
 

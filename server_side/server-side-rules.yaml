@@ -287,6 +287,8 @@ rules:
   rules:
   - All env-derived config loaded once into a typed config module; app imports that — not scattered process.env.
   - Schema-validate required env at boot; refuse to start if critical missing.
+  - Keep privileged analytics/marketing credentials, conversion API tokens, webhook secrets, and administrative vendor calls server-only.
+  - Expose only explicitly classified public provider IDs to clients, supplied through environment/deployment config without real hardcoded fallbacks.
   - Avoid NODE_ENV branching in business logic — branch at composition/config.
   - Dev/staging/prod have separate DBs, keys, and queues.
   - Risky behavior behind feature flags.
@@ -298,7 +300,8 @@ rules:
   - Reading process.env.DB_URL inside random services.
   - Sharing one DB across development and production.
   - Defaulting missing critical secrets to empty string.
-  ai_directive: Centralize and schema-validate config at startup. Separate environments fully. Fail fast on missing secrets. No hardcoded env branching in business logic.
+  - Returning secret vendor credentials from config/bootstrap endpoints or embedding them in rendered HTML/client bundles.
+  ai_directive: Centralize and schema-validate config at startup. Keep privileged marketing/analytics credentials server-only, expose only classified public IDs, and never use real hardcoded fallbacks in server or client configuration.
 - id: SS-14
   title: Testing Standards (Backend)
   status: complete

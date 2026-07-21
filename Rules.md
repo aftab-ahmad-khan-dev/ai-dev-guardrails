@@ -556,6 +556,8 @@ src/store/
 - All env-dependent values read from one config/env.js wrapping import.meta.env/process.env.
 - .env.example lists every client env var as placeholders and stays in sync.
 - Only public-prefixed vars (VITE_, NEXT_PUBLIC_) may enter the client bundle.
+- Public-prefixed values are still exposed to every browser user. Never describe them as secured, hidden, or protected by `.env`.
+- Tracking/config identifiers (Meta Pixel IDs, Clarity project IDs, GA measurement IDs, Sentry DSNs, map tokens, etc.) must come from validated client-safe env vars with placeholder-only examples — never real hardcoded literals or production fallback values.
 - API secrets, private keys, DB credentials must never be referenced in client env.
 - .env.development/.staging/.production stay structurally identical (same keys).
 - Validate required env vars at build/startup and fail fast if missing.
@@ -568,8 +570,9 @@ src/store/
 - Committing real .env files with secrets.
 - Reading process.env.X ad-hoc inside random components.
 - Putting a payment secret in a client-exposed env var.
+- Using `import.meta.env.VITE_META_PIXEL_ID || "real-production-id"` or arrays of literal provider IDs; the fallback and literals are shipped in the bundle.
 
-**AI directive:** Centralize env behind config/env.js. Only public-prefixed vars in the client. Never emit secrets into the bundle. Fail fast on missing required vars.
+**AI directive:** Centralize env behind config/env.js. Treat every client env value as public, flag real hardcoded IDs/fallbacks, and never claim `VITE_`/`NEXT_PUBLIC_` values are secured. Keep secrets server-side and fail fast on missing required config.
 
 ---
 
@@ -585,6 +588,8 @@ src/store/
 - Conventional commits: type(scope): message.
 - No direct pushes to main — PR + review + passing CI.
 - Pre-commit lint/format/typecheck (Husky + lint-staged) when the project uses them.
+- A pre-push hook/script must run the applicable local test and security suite before network push: tests, lint/typecheck, dependency audit, secret scan, exposed client-config scan, and build when configured.
+- Any failed test or high/critical security result blocks the push. Fix locally and rerun; bypassing with `--no-verify` requires explicit documented emergency approval.
 - PR description: what, why, how tested, screenshots for UI.
 - Prefer squash-merge for linear main history when team policy allows.
 
@@ -596,8 +601,9 @@ src/store/
 - Committing generated build artifacts.
 - Force-pushing over shared branches others use.
 - Merging with failing CI or unresolved blocking review comments.
+- Pushing first and waiting for remote CI to reveal failures that the required local pre-push suite can detect.
 
-**AI directive:** Follow conventional commits, focused PRs, and protected main. Never commit build artifacts or AI workspace files.
+**AI directive:** Follow conventional commits, focused PRs, and protected main. Before every push, run the local test/security gate and report results; fix failures before pushing. Never bypass hooks or commit build artifacts/AI workspace files.
 
 ---
 
@@ -636,6 +642,8 @@ src/store/
 
 **Rules**
 - All analytics through one services/analytics.js wrapper — never call gtag/mixpanel directly from components.
+- Provider/project IDs are public identifiers once bundled, not secrets. Load them from documented client-safe env vars so environments and consent policy remain controllable.
+- No real tracking IDs as source-code literals, fallback strings, or hardcoded arrays. Missing IDs disable that provider or fail validation according to documented policy.
 - Consistent noun_verb event names documented in a shared events dictionary.
 - Never send raw emails, names, or payment details — use hashed/anonymized IDs.
 - Load analytics only after cookie/consent where GDPR/CCPA requires it.
@@ -650,8 +658,10 @@ src/store/
 - Scattering provider SDK calls across dozens of components.
 - Logging full user objects as event metadata.
 - Loading tracking scripts before consent is obtained.
+- Treating a Meta Pixel ID, Clarity project ID, GA measurement ID, or similar client identifier as “secured” merely because it is read through `import.meta.env`.
+- Shipping production tracking IDs as `env.VALUE || "literal"` defaults.
 
-**AI directive:** Centralize analytics behind a service wrapper with consent gating, noun_verb events, and no PII in properties.
+**AI directive:** Centralize analytics behind a consent-gated wrapper. Treat client tracking IDs as public configuration, require env-only values with no real fallback literals, and flag any exposed hardcoded provider ID during review.
 
 ---
 
@@ -1065,6 +1075,8 @@ src/
 **Rules**
 - All env-derived config loaded once into a typed config module; app imports that — not scattered process.env.
 - Schema-validate required env at boot; refuse to start if critical missing.
+- Keep privileged analytics/marketing credentials, conversion API tokens, webhook secrets, and administrative vendor calls server-only; expose only explicitly classified public identifiers to the client.
+- When the frontend needs a public provider ID, supply it through environment/deployment configuration—not a hardcoded source fallback—and never send server credentials alongside it.
 - Avoid NODE_ENV branching in business logic — branch at composition/config.
 - Dev/staging/prod have separate DBs, keys, and queues.
 - Risky behavior behind feature flags.
@@ -1078,8 +1090,9 @@ src/
 - Reading process.env.DB_URL inside random services.
 - Sharing one DB across development and production.
 - Defaulting missing critical secrets to empty string.
+- Returning secret vendor credentials from config/bootstrap endpoints or embedding them in rendered HTML/client bundles.
 
-**AI directive:** Centralize and schema-validate config at startup. Separate environments fully. Fail fast on missing secrets. No hardcoded env branching in business logic.
+**AI directive:** Centralize and schema-validate config at startup. Keep privileged marketing/analytics credentials server-only, expose only classified public IDs, and never use real hardcoded fallbacks in server or client configuration.
 
 ---
 
@@ -1397,6 +1410,7 @@ Apply these across **client**, **server**, and **security** unless the project a
 - Least-privilege keys.
 - CI masks secrets in logs.
 - Pre-commit secret scanning (gitleaks/trufflehog).
+- Pre-push scanning must also inspect source/bundles for hardcoded client configuration and tracking identifiers. A public identifier may not require rotation like a secret, but it must still be reported as exposed configuration and removed from source-code literals.
 - Name env/secrets with SCREAMING_SNAKE by purpose (JWT_SECRET) — never embed real secret values in names or comments.
 
 **Do**
@@ -1420,7 +1434,9 @@ Apply these across **client**, **server**, and **security** unless the project a
 
 **Rules**
 - Classify every env var as client-safe or server-only at definition time.
+- “Client-safe” means intentionally public, not secured. Record exposure and purpose in the env registry.
 - Secret-bearing vars have no hardcoded fallback — fail to start if missing in production.
+- Client-safe production identifiers also have no real source-code fallback; use deployment env values and placeholder-only `.env.example` entries.
 - Schema-validate required env at startup (zod/envalid).
 - Distinct credentials per environment.
 - Maintain a registry (docs/env.md) of every var, purpose, and public/secret.
@@ -1432,6 +1448,7 @@ Apply these across **client**, **server**, and **security** unless the project a
 
 **Don't**
 - Hardcoding temporary fallback secrets that ship to production.
+- Hardcoding tracking/project IDs in client config or arrays, including fallback literals after `VITE_*` / `NEXT_PUBLIC_*`.
 - Sharing one .env with production credentials across developers.
 - Storing env vars in plaintext shared docs.
 
@@ -1861,6 +1878,7 @@ User: refactor payment flow; secrets come from process.env.STRIPE_SECRET_KEY (pl
 - No secrets inline in pipeline YAML — reference the secret store.
 - Build once, sign/checksum, promote immutable artifacts.
 - SAST + dependency scanning as required blocking steps.
+- Mirror the applicable test/security gate locally in a pre-push hook so failures are visible and fixable before code leaves the workstation.
 - Fork PRs never get production secrets by default.
 - CI config changes go through the same PR review as app code.
 
@@ -1872,8 +1890,9 @@ User: refactor payment flow; secrets come from process.env.STRIPE_SECRET_KEY (pl
 - Root/admin cloud keys as CI secrets.
 - Fork PRs with production secret access.
 - Skipping security scans to speed up the pipeline.
+- Treating remote CI as the first time tests or mandatory security scans run.
 
-**AI directive:** Scope CI secrets, protect production deploys, scan in pipeline, promote immutable artifacts, and never expose secrets to fork PRs.
+**AI directive:** Scope CI secrets, protect production deploys, require local pre-push tests/security scans plus remote CI, promote immutable artifacts, and never expose secrets to fork PRs.
 
 ---
 
@@ -2514,7 +2533,7 @@ User: refactor payment flow; secrets come from process.env.STRIPE_SECRET_KEY (pl
 
 ## 6. Security Scan Checklist
 
-Run the scans that apply to your project. In **CI**, failing **critical/high** findings should block merge/deploy unless explicitly waived with documented approval.
+Run the scans that apply to your project. The applicable test/security suite must run **locally before every push**, then run again in CI. Failed tests and **critical/high** findings block push/merge/deploy unless explicitly waived with documented emergency approval.
 
 ### 6.1 Pre-commit (local)
 
@@ -2525,7 +2544,24 @@ Run the scans that apply to your project. In **CI**, failing **critical/high** f
 | Typecheck | `npm run typecheck` / `tsc --noEmit` | Type errors |
 | Staged path guard | custom script or `git diff --cached` | `.env`, `.cursor/`, `.claude/`, `*.pem` staged |
 
-### 6.2 Dependency & supply chain (every Node project)
+### 6.2 Pre-push gate (local, mandatory)
+
+Wire a tracked pre-push script/hook (for example Husky, Lefthook, pre-commit framework, or the repository’s task runner). It must show results locally before `git push` contacts the remote.
+
+| Check | Command / tool | Blocks push when |
+|-------|----------------|------------------|
+| Tests | project test command (e.g. `npm test -- --run`) | Any required test fails |
+| Lint & typecheck | `npm run lint` + `npm run typecheck` | Errors |
+| Dependency audit | `npm audit --audit-level=high` (or ecosystem equivalent) | High/critical vulnerability |
+| Secret scan | `gitleaks detect --source .` (or approved equivalent) | Credential/key material found |
+| Client exposure scan | SAST/custom patterns + production build inspection | Hardcoded tracking IDs, public-config fallbacks, secret-like values, or internal endpoints found |
+| Build | project build command, when configured | Build fails |
+
+- Fix failures locally, rerun the complete gate, then push.
+- Do not use `git push --no-verify` to skip the gate except under documented emergency approval.
+- CI remains mandatory; a local pass does not replace protected-branch checks.
+
+### 6.3 Dependency & supply chain (every Node project)
 
 | Check | Command | Fail on |
 |-------|---------|---------|
@@ -2534,7 +2570,7 @@ Run the scans that apply to your project. In **CI**, failing **critical/high** f
 | Lockfile review | PR diff on `package-lock.json` | Unexpected new packages |
 | Optional | Socket.dev, Snyk, Dependabot | Policy violations |
 
-### 6.3 Static analysis & code quality (CI)
+### 6.4 Static analysis & code quality (CI)
 
 | Check | When | Notes |
 |-------|------|-------|
@@ -2543,18 +2579,19 @@ Run the scans that apply to your project. In **CI**, failing **critical/high** f
 | SAST | CI pipeline | Semgrep, CodeQL, or org standard |
 | Dockerfile scan | If using Docker | Trivy, Grype — block critical |
 
-### 6.4 Security rules spot-check (AI or human review)
+### 6.5 Security rules spot-check (AI or human review)
 
 | Area | What to verify |
 |------|----------------|
 | SEC-02 / SEC-03 | No hardcoded secrets; `.env` gitignored; `.env.example` present |
+| Client config exposure | No literal tracking/project IDs or real `VITE_*` / `NEXT_PUBLIC_*` fallback values; public IDs are documented as exposed |
 | SEC-04 / SEC-06 | No `.cursor/`, `.claude/`, session logs in diff |
 | SEC-05 | No proprietary logic in client bundle; no internal URLs in comments |
 | SEC-08–10 | Server validation; parameterized queries; no unsafe `dangerouslySetInnerHTML` |
 | SEC-11–13 | CSRF for cookie sessions; rate limits on auth; CORS allowlist |
-| Client CS-16 | No secrets in `VITE_` / `NEXT_PUBLIC_` vars |
+| Client CS-16 / CS-19 | No secrets in `VITE_` / `NEXT_PUBLIC_`; no hardcoded analytics IDs/fallbacks; tracking is consent-gated |
 
-### 6.5 Pre-deploy (when DevOps applies)
+### 6.6 Pre-deploy (when DevOps applies)
 
 | Check | Notes |
 |-------|-------|
@@ -2565,11 +2602,11 @@ Run the scans that apply to your project. In **CI**, failing **critical/high** f
 | Health check configured | `/health` or platform equivalent |
 | Backup verified | for production data stores |
 
-### 6.6 AI compliance report
+### 6.7 AI compliance report
 
 After significant code generation or review, output the **Compliance Report** defined in [README.md](README.md#compliance-report-template). Mark each category `PASS`, `WARN`, `FAIL`, or `N/A` with a one-line note.
 
-**AI directive:** At the end of implementation or security review tasks, produce the compliance report in the log. Never mark `PASS` for a category you did not evaluate. Use `N/A` when the project has no backend, no deploy target, etc.
+**AI directive:** Before any requested push, run and report the applicable local pre-push test/security gate; fix blocking failures before pushing. At the end of implementation or security review tasks, produce the compliance report. Never mark `PASS` for a category you did not evaluate.
 
 ---
 

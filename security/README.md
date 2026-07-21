@@ -43,4 +43,12 @@ Paste [`security-rules.yaml`](security-rules.yaml) into your AI tool for any pro
 | **SEC-05** | Proprietary code leaks, IP theft, public repos, client-bundle exposure |
 | **SEC-06** | Pasting secrets/code into AI chats, unreviewed AI output, mistaken AI commits |
 
+### Mandatory local pre-push gate
+
+Before every push, run tests, lint/typecheck, dependency auditing, secret scanning, client-exposure scanning, and the build where configured. Failed tests and high/critical findings block push; fix and rerun locally. Do not bypass with `--no-verify` except under documented emergency approval. Remote CI repeats—not replaces—this gate.
+
+### Public client configuration is still exposed
+
+`VITE_*` and `NEXT_PUBLIC_*` values are embedded in browser bundles. Analytics/project IDs may be public identifiers rather than credentials, but they must not be labeled “secured” or shipped as hardcoded production literals/fallback arrays. Use validated client-safe deployment env vars with placeholder-only examples; keep tokens, webhook secrets, and privileged vendor operations server-side.
+
 > **Status:** All 20 rules are fully written (`status: complete`).
