@@ -2,10 +2,10 @@
 meta:
   category: security
   title: Security Rules
-  version: 2.0.0
+  version: 2.1.0
   updated: '2026-07-21'
   rule_id_prefix: SEC
-  purpose: Protect source, credentials, dependencies, and runtime. Refuse to generate security violations.
+  purpose: Protect source code confidentiality, credentials, dependencies, and runtime. Prevent IP theft, accidental leaks (including via AI tools), and supply-chain compromise. Refuse to generate security violations.
   usage: 'Instruct: "Enforce every security rule below and refuse to generate violations."'
   source: AI Dev Rules Master Prompt Pack — Part 3
 rules:
@@ -43,6 +43,7 @@ rules:
   - Least-privilege keys.
   - CI masks secrets in logs.
   - Pre-commit secret scanning (gitleaks/trufflehog).
+  - Name env/secrets with SCREAMING_SNAKE by purpose (JWT_SECRET) — never embed real secret values in names or comments.
   do:
   - Rotate on exposure before investigating fully.
   - Scope keys per environment.
@@ -72,24 +73,27 @@ rules:
   - Storing env vars in plaintext shared docs.
   ai_directive: Classify env vars, validate at boot, no secret defaults, separate per environment, and document the registry.
 - id: SEC-04
-  title: ".gitignore & Never-Commit Rules"
+  title: Never Commit AI-Workspace & Assistant Artifacts
   status: complete
-  severity: high
-  summary: Prevent credentials, build output, and AI-assistant workspace data from reaching the repository.
+  severity: critical
+  summary: AI/editor workspace files, session caches, and contributor metadata must never reach git — they leak paths, prompts, and sometimes secrets.
   rules:
-  - Baseline gitignore includes .env, node_modules, dist/build/.next, coverage, logs, OS noise.
-  - Never commit .cursor/, .claude/, .windsurf/, or AI session/context folders.
-  - Personal IDE settings stay out unless explicitly shared team tooling.
-  - CI greps PRs for disallowed paths (.env, .cursor, .claude, private keys) and fails.
-  - Onboarding audit existing history with gitleaks; remediate if needed.
+  - Never commit .cursor/, .claude/, .claude.json, .windsurf/, .aider*, .continue/, or similar AI session/context folders.
+  - Never commit AI chat exports, prompt logs, agent transcripts, or local rules files meant only for personal use (.cursorrules.local).
+  - Never commit contributor metadata, session tokens, or AI-generated "contributors" blocks in commit messages.
+  - Baseline .gitignore must include AI workspace paths before the first commit.
+  - Personal IDE state (.idea/, local .vscode/*) stays out unless explicitly reviewed as shared team tooling.
+  - CI must grep every PR diff for disallowed paths (.env, .cursor, .claude, *.pem, *.key) and fail the build.
+  - Share team AI rules via reviewed files in the repo (e.g. this utils pack) — not by committing local AI caches.
   do:
-  - Add ignores before first commit.
-  - Share team rules via reviewed docs/YAML — not by committing .cursor/.
+  - Add AI/editor ignores up front; audit git status before every commit.
+  - Run a one-time gitleaks/history scan when adopting these rules on an existing repo.
+  - Keep .env.example and shared rule YAML in git; keep .env and .cursor/ out.
   dont:
-  - Committing .cursor/.claude for teammate context.
-  - gitignore exceptions for a secret file just this once.
-  - Assuming gitignore removes already-committed files.
-  ai_directive: Maintain a strong .gitignore covering secrets, builds, and AI workspace paths. Never stage .cursor/.claude/.env. Enforce in CI.
+  - Committing .cursor/ or .claude/ because it has useful context for teammates.
+  - Adding a .gitignore exception for one secret or workspace file just this once.
+  - Assuming .gitignore removes files already tracked — they must be purged from history.
+  ai_directive: Never stage or generate commits that include .cursor/, .claude/, session logs, or AI workspace caches. If they appear in a diff, flag them and refuse to commit. Point teammates to reviewed shared rule files instead.
   example:
     good: |-
       .env
@@ -104,48 +108,87 @@ rules:
       .windsurf/
       *.log
       .DS_Store
+  triggers:
+  - New repo bootstrap or first AI-tool setup.
+  - git status shows .cursor/ or .claude/ as untracked before commit.
+  - Teammate asks to commit local AI config for sharing.
 - id: SEC-05
-  title: Code & Data Leak Prevention
+  title: Confidential Code, IP Theft & Leak Prevention
   status: complete
   severity: critical
-  summary: Stop sensitive logic, credentials, and user data from leaking through code, logs, or client bundles.
+  summary: Protect proprietary source, business logic, and customer data from leaking via repos, bundles, logs, tickets, screenshots, or public channels — and from theft via weak access controls.
   rules:
-  - No hardcoded secrets as string literals — always env/secrets manager.
-  - Pricing rules, proprietary algorithms, and auth checks stay server-side.
-  - Sanitize error responses — no stacks, paths, SQL, or env details in production.
-  - Production source maps private (error tracker only) or not generated publicly.
-  - No open /debug or admin-bypass routes in production.
-  - PII minimization — return only fields the client needs.
-  - No TODO comments with real credentials, internal URLs, or security workarounds.
+  - Treat all proprietary/confidential source as need-to-know — private repos by default; verify remote visibility before every push.
+  - Never expose internal URLs, infra topology, admin endpoints, or proprietary algorithms in public repos, client bundles, comments, or docs.
+  - Keep pricing rules, fraud logic, licensing, and security controls server-side — never ship them in frontend code where they can be reverse-engineered.
+  - Sanitize API errors in production — no stack traces, SQL, file paths, or env details to clients.
+  - Production source maps are private (error tracker only) or not published — never serve full maps publicly.
+  - Strip TODO/FIXME comments of internal hostnames, credentials, incident details, or security bypass notes before merge.
+  - PII minimization — API responses return only fields the client needs; never dump full DB rows.
+  - No open /debug, /test, or admin-bypass routes in production.
+  - 'Protect against code theft: branch protection, least-privilege repo access, revoke access on offboarding, audit bulk exports/clones and long-lived PATs where the platform allows.'
+  - License headers and IP ownership on proprietary files; do not paste client-owned or NDA code into unrelated projects.
+  - Never post confidential snippets to public Gists, Stack Overflow, Discord, screenshots, or Loom recordings without redaction and approval.
   do:
-  - Keep confidential logic behind the API boundary.
-  - Review diffs for internal hostnames and secrets.
+  - Review every PR diff for internal hostnames, secrets, and confidential comments.
+  - Use CODEOWNERS or path protections on sensitive directories (auth, billing, infra).
+  - Time-box contractor/agency repo access; rotate deploy keys they used.
+  - Confirm git remote is the intended private org before push or PR creation.
   dont:
-  - Logging entire request/response with auth headers.
-  - console.log(process.env) anywhere.
-  - Client-only admin mode toggle without server permission checks.
-  ai_directive: Keep secrets and proprietary logic server-side. Sanitize errors, minimize PII in responses, and never leave debug bypasses in production.
+  - Publishing a private repo to a public remote without a visibility check.
+  - Logging full request/response bodies on auth or payment endpoints.
+  - Leaving a client-side isAdmin toggle with no server-side permission check.
+  - Sharing production DB dumps or full code exports in tickets, email, or chat.
+  - Assuming "private repo" removes the need to scrub comments and client bundles.
+  ai_directive: Keep confidential and proprietary logic server-side. Never emit internal URLs, credentials, or full proprietary modules into client code, comments, or public examples. Flag any diff that would leak IP or enable code theft (public remotes, missing access controls, exported secrets).
+  triggers:
+  - Preparing a public OSS release from previously internal code.
+  - Adding comments or debug logs during an incident.
+  - Onboarding/offboarding a contractor with repo access.
+  - Shipping a frontend build that imports server-only business logic.
+  example:
+    bad: |-
+      // TODO: call internal admin at http://10.0.3.7:9000 with root token
+      // pricingMultiplier hardcoded in React for 'speed'
+    good: |-
+      // Calls admin service via gateway; credentials from secrets manager
+      // pricing computed server-side; client receives final price only
 - id: SEC-06
-  title: Variable Naming Conventions
+  title: AI-Assisted Development — Confidentiality & Mistake Prevention
   status: complete
-  severity: medium
-  summary: Naming that is consistent, unambiguous, and never accidentally exposes secret values.
+  severity: critical
+  summary: Prevent accidental confidentiality breaches and IP leaks caused by misuse of AI coding assistants (Cursor, Claude, Copilot, etc.) — pasted secrets, proprietary code in prompts, unreviewed generated output, and mistaken commits.
   rules:
-  - camelCase vars/functions; PascalCase components/classes; UPPER_SNAKE constants/env; kebab-case folders (component files match PascalCase).
-  - Booleans prefixed is/has/can/should.
-  - No ambiguous abbreviations (usr, tmpVal).
-  - Names containing secret/token/key/password/credential get extra review — never logged/committed/sent to client unintentionally.
-  - Never put actual secret values in names or comments.
-  - Collections plural; singular objects singular.
-  - Functions = verb + noun (getUser, validateEmail).
+  - Never paste proprietary source, production credentials, customer PII, or internal architecture into public or consumer AI chats without redaction and org approval.
+  - Use synthetic/sample data in AI prompts — not real user records, API keys, or production connection strings.
+  - 'Redact before prompting: replace secrets with placeholders (YOUR_API_KEY), mask hostnames and account IDs.'
+  - Assume cloud AI inputs may be retained or processed per vendor policy — use enterprise/zero-retention tiers for confidential work when available.
+  - Review all AI-generated code before commit — it may invent plausible secrets, copy GPL code, expose internals in comments, or suggest committing .env/.cursor/.
+  - AI must refuse to hardcode secrets, commit .env files, or include AI-workspace paths in git — and must warn if the user pasted a real credential.
+  - Do not upload .env, database dumps, private keys, or full proprietary repos as "context files" to AI tools unless the tool and contract are approved for that data class.
+  - Never ask AI to push to git without confirming remote visibility (private vs public) and branch name.
+  - Do not publish AI-generated code snippets containing your internal module names, routes, or schemas to public forums without review.
+  - 'If confidential code was pasted into an AI tool in error, treat it as a potential leak: rotate any exposed secrets, notify security per policy, and avoid repeating the paste.'
   do:
-  - Use intent-revealing names.
-  - Distinguish public vs private config by name.
+  - Paste this security pack (or SEC-04/05/06) into AI system prompts so the assistant enforces leak prevention.
+  - Use .cursorignore / .gitignore to keep secrets and dumps out of AI indexing scope.
+  - Run secret scanning and human review on AI-heavy PRs the same as any other PR.
+  - Prefer describing behavior in prompts instead of pasting entire proprietary files.
   dont:
-  - tempPassword then logging the object.
-  - Generic data/obj/temp holding sensitive fields.
-  - Example credentials in names that look real.
-  ai_directive: Apply casing standards and intent-revealing names. Flag secret-sounding identifiers. Never embed secret values in names or comments.
+  - Pasting a production .env or Stripe live key into chat to debug faster.
+  - Blindly accepting AI suggestions that add console.log(process.env) or commit .cursor/.
+  - Using personal consumer AI accounts for client NDA work without a data-processing agreement.
+  - Letting AI auto-commit without reviewing the full diff for secrets and workspace files.
+  - Assuming deleting a message in chat erases it from vendor retention.
+  ai_directive: You are a confidentiality-aware assistant. Never request, repeat, or commit real secrets, proprietary client code, or AI-workspace files. Redact sensitive input, refuse unsafe commits, warn on pasted credentials, and keep proprietary logic server-side. If the user shares confidential material, advise redaction and secret rotation — do not amplify it in your response.
+  triggers:
+  - User asks AI to debug with real credentials or production data.
+  - AI suggests committing .cursor/, .claude/, or .env.
+  - Large proprietary file pasted into the chat for refactoring.
+  - AI-generated PR touches auth, billing, crypto, or infra config.
+  example:
+    bad: 'User: here is our prod .env and full paymentService.ts — refactor it\nAI: commits changes including sk_live_... in a constant'
+    good: 'User: refactor payment flow; secrets come from process.env.STRIPE_SECRET_KEY (placeholder)\nAI: server-side only, no secrets in client, flags if user pastes sk_live_'
 - id: SEC-07
   title: Authentication & Authorization
   status: complete
