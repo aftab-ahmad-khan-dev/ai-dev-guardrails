@@ -1,19 +1,72 @@
-# Rules.md — AI Development Rules (All-in-One)
+# Rules.md — AI Development Rules & Skills (All-in-One)
 
-> **Version:** 2.1.0 · **Updated:** 2026-07-21  
+> **Version:** 2.2.0 · **Updated:** 2026-07-21  
 > **Repository:** https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails
 > 
-> Single-file reference for Cursor, Claude, Copilot, and project `.cursor/rules`.
-> For **how to apply rules by project type** and the **compliance report template**, see [README.md](README.md).
+> Single-file **rules + skills** reference for Cursor, Claude, Copilot, and project `.cursor/rules`.
+> **Project detail & tasks live in [`SRS.md`](SRS.md)** — read it first; update status after each done task.
+> For **how to apply by project type** and the **compliance report template**, see [README.md](README.md).
 
 ## Table of Contents
 
+0. [Rules, Skills & SRS Workflow](#0-rules-skills--srs-workflow)
 1. [Client-Side Rules](#1-client-side-rules)
 2. [Server-Side Rules](#2-server-side-rules)
 3. [Variable & Naming Conventions](#3-variable--naming-conventions)
 4. [Security Rules](#4-security-rules)
 5. [DevOps Rules](#5-devops-rules)
 6. [Security Scan Checklist](#6-security-scan-checklist)
+
+---
+## 0. Rules, Skills & SRS Workflow
+
+This pack is both **rules** (what good code must satisfy) and **skills** (how the AI must operate on a project).
+
+| Kind | Role |
+|------|------|
+| **Rules** | CS-*, SS-*, naming, SEC-*, OPS-*, scans — quality, security, and delivery standards |
+| **Skills** | Repeatable workflows: read SRS → pick task → implement under rules → mark complete → report |
+
+### Skill SRS-01 — Always read `SRS.md` first
+
+> **Severity:** `critical` · **Status:** `complete`
+
+**Summary:** All project description, scope, and tasks live in [`SRS.md`](SRS.md). Do not invent product goals or task lists from chat alone when `SRS.md` exists.
+
+**Rules**
+- Before planning, coding, or reviewing: **open and read `SRS.md`**.
+- Treat § Project description as source of truth for what the product is.
+- Work from the **task board** (version sections and/or dated backlog) — prefer current-version open tasks.
+- If `SRS.md` is missing in a consuming project, create it from this repo’s template and ask the human to confirm description + first tasks before large implementation.
+
+**Do**
+- State which task ID(s) you are executing (e.g. `T-002`) at the start of work.
+- Set that task to `in_progress` in `SRS.md` when you begin (one primary task unless asked to parallelize).
+- After the task is done: set status to `done`, fill **Completed** (ISO date), add a short **Notes** line, bump **Last updated**.
+- Extend the board when scope grows: new rows under the right **version**, and/or a new **dated** section — never silently drop history (use `cancelled` + reason).
+- When a version ships, update the version roadmap status and SRS change log.
+
+**Don't**
+- Skip `SRS.md` and implement from memory or a vague chat request when the board exists.
+- Mark `done` without updating `SRS.md`.
+- Delete completed tasks; keep them as history.
+- Expand scope into new features without adding tasks to `SRS.md` (or getting human approval first).
+
+**AI directive:** Read `SRS.md` first. Execute open tasks under applicable CS/SS/SEC/OPS rules. On every completion, update `SRS.md` status (and version/date sections as needed). Emit the compliance report from the README when the slice is reviewable.
+
+### Skill SRS-02 — Version- and date-wise task extension
+
+> **Severity:** `high` · **Status:** `complete`
+
+**Summary:** Tasks may grow over time. Organize new work by **version** (`0.1.0`, `0.2.0`, …) and/or by **date** sections in `SRS.md`.
+
+**Rules**
+- New planned work → add under the target version table (create the version section if needed).
+- Time-boxed / one-off work → add under an Ad-hoc / dated backlog day section.
+- Keep IDs unique (`T-###` for version tasks, `D-###` for dated tasks).
+- Sync **Current version** and roadmap table when starting a new version.
+
+**AI directive:** When the human adds scope (“also do X in v0.2” / “by Friday”), extend `SRS.md` with the new task row(s) under the correct version or date, then execute from that board.
 
 ---
 ## 1. Client-Side Rules

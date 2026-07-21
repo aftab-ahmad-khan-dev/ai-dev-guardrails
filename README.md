@@ -1,10 +1,10 @@
-# Ai-dev-guardrails — AI Development Rules
+# Ai-dev-guardrails — AI Development Rules & Skills
 
-Reusable rules for **Cursor**, **Claude**, **Copilot**, and any AI coding assistant.  
+Reusable **rules** and **skills** for **Cursor**, **Claude**, **Copilot**, and any AI coding assistant.  
 Keep code clean, modular, secure, and consistent — without forcing rules that do not apply to your project.
 
 **Repository:** https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails  
-**Version:** 2.1.0
+**Version:** 2.2.0
 
 ---
 
@@ -12,16 +12,20 @@ Keep code clean, modular, secure, and consistent — without forcing rules that 
 
 | Goal | Use this |
 |------|----------|
-| **Everything in one file** | [`Rules.md`](Rules.md) — all 80 rules + naming + security scans |
+| **Project description & tasks** | [`SRS.md`](SRS.md) — living requirements + version/date task board (AI reads & updates this) |
+| **Everything in one file** | [`Rules.md`](Rules.md) — rules + SRS skills + naming + security scans |
 | **Category YAML packs** | `client_side/`, `server_side/`, `security/`, `devops/` |
 | **Deploy workflow starters** | [`devops/pipelines/`](devops/pipelines/) |
 
 **Paste into your AI system prompt:**
 
 ```text
-Follow Rules.md (or the relevant sections) for this project.
-Apply only rules that match the project type — see README applicability matrix.
-At the end, output the Compliance Report template from the README.
+This pack is rules AND skills.
+1. Read SRS.md first for project description and open tasks.
+2. Follow Rules.md (applicable sections only — see README matrix).
+3. After each task is done, mark it complete in SRS.md and refresh status / Last updated.
+4. Extend SRS.md tasks by version and/or date when scope grows.
+5. At the end, output the Compliance Report template from the README.
 ```
 
 ---
@@ -57,8 +61,9 @@ At the end, output the Compliance Report template from the README.
 ## Repo structure
 
 ```
-utils/
-├── Rules.md                 # ← All rules in one markdown file
+ai-dev-guardrails/
+├── SRS.md                   # ← Project description + version/date task board (template)
+├── Rules.md                 # ← Rules + SRS skills + all standards in one file
 ├── README.md                # ← This file (how to apply + report template)
 ├── client_side/             # CS-01…CS-20 (YAML)
 ├── server_side/             # SS-01…SS-20 (YAML)
@@ -66,19 +71,47 @@ utils/
 └── devops/                  # OPS-01…OPS-20 (YAML) + pipelines/
 ```
 
-YAML packs and `Rules.md` stay in sync. Prefer **`Rules.md`** for a single paste; use **folder YAML** when you only need one layer.
+YAML packs and `Rules.md` stay in sync. Prefer **`Rules.md`** for a single paste; use **folder YAML** when you only need one layer.  
+Copy **`SRS.md`** into each consuming project and fill description + tasks — that file is the living backlog the AI must maintain.
+
+---
+
+## Rules vs skills
+
+| | **Rules** | **Skills** |
+|---|-----------|------------|
+| **What** | Quality / security / delivery standards (CS-*, SS-*, SEC-*, OPS-*) | How the AI must run a project day-to-day |
+| **Where** | `Rules.md` §§1–6 + YAML packs | `Rules.md` §0 (SRS-01, SRS-02) + this README |
+| **Example** | “No file over 400 LOC” | “Read `SRS.md`, finish `T-003`, mark `done`” |
+
+---
+
+## SRS-driven delivery (mandatory skill)
+
+**Source of truth for product detail and tasks:** [`SRS.md`](SRS.md)
+
+1. **Read `SRS.md`** — project description, roadmap, and open tasks (by version and/or date).
+2. **Pick a task** — prefer current-version `todo` / continue `in_progress`; announce the task ID.
+3. **Apply rules** — only sections that match project type (matrix below).
+4. **Mark complete** — set status `done`, fill **Completed** date + **Notes**, bump **Last updated**.
+5. **Extend when needed** — add rows under a version section or a dated backlog; update roadmap when versions change.
+6. **Report** — emit the compliance report after a reviewable slice.
+
+Do not delete task history; use `cancelled` with a reason. If `SRS.md` is missing, scaffold from this template before large work.
 
 ---
 
 ## How AI should follow rules effectively
 
-1. **Read applicability** — Confirm project type (frontend / backend / full-stack / deploy target).
-2. **Load relevant sections** — From `Rules.md` or merged YAML packs.
-3. **Respect existing conventions** — Server rules extend the boilerplate; naming mirrors the codebase.
-4. **Refuse violations** — No secrets in code, no `.cursor/` in commits, no proprietary logic in client bundles.
-5. **Estimate file size** — Split before 400 LOC (CS-01 / SS-01).
-6. **Run applicable scans** — See Rules §6 and report results.
-7. **Emit compliance report** — After implementation or review (template below).
+1. **Read `SRS.md`** — description, current version, open tasks.
+2. **Read applicability** — Confirm project type (frontend / backend / full-stack / deploy target).
+3. **Load relevant sections** — From `Rules.md` or merged YAML packs.
+4. **Respect existing conventions** — Server rules extend the boilerplate; naming mirrors the codebase.
+5. **Refuse violations** — No secrets in code, no `.cursor/` in commits, no proprietary logic in client bundles.
+6. **Estimate file size** — Split before 400 LOC (CS-01 / SS-01).
+7. **Update `SRS.md`** — mark finished tasks `done`; extend by version/date if scope grew.
+8. **Run applicable scans** — See Rules §6 and report results.
+9. **Emit compliance report** — After implementation or review (template below); include SRS task IDs in **Scope**.
 
 ### Always-on (every project)
 
@@ -113,6 +146,7 @@ Use clear status icons and honest `N/A` when a category does not apply.
 ║  Project : <name or path>                                        ║
 ║  Type    : <e.g. React SPA · no backend · Vercel deploy>         ║
 ║  Date    : <ISO date>                                            ║
+║  SRS     : <task IDs e.g. T-002, T-003 — statuses updated in SRS.md> ║
 ║  Scope   : <what was built or reviewed>                          ║
 ╚══════════════════════════════════════════════════════════════════╝
 
@@ -166,6 +200,7 @@ Status legend:
 - Never mark `PASS` without actually checking that category.
 - List which scans ran and which were skipped (with reason).
 - Include specific rule IDs (CS-*, SS-*, SEC-*, OPS-*) for `WARN` and `FAIL`.
+- Confirm `SRS.md` was updated for every completed task ID listed under **SRS**.
 - End with a one-line **Verdict**: safe to proceed / fix required / blocked.
 
 ---
@@ -200,11 +235,12 @@ rules:
 
 ---
 
-## Rule index
+## Rule & skill index
 
 | Pack | File | Count | Focus |
 |------|------|-------|-------|
-| All | [Rules.md](Rules.md) | 80 + naming + scans | Single-file reference |
+| SRS board | [SRS.md](SRS.md) | template | Project description + version/date tasks |
+| All | [Rules.md](Rules.md) | SRS skills + 80 + naming + scans | Rules & skills in one file |
 | [client_side](client_side/README.md) | `CS` | 20 | Modularity, UX, a11y, SEO, Tailwind |
 | [server_side](server_side/README.md) | `SS` | 20 | Layers, REST, auth, jobs, migrations |
 | [security](security/README.md) | `SEC` | 20 | Confidentiality, AI safety, injection |
@@ -215,5 +251,6 @@ rules:
 ## Contributing
 
 - Keep `Rules.md` in sync when YAML packs change.
-- One rule = one testable directive.
+- Keep `SRS.md` current when this pack’s own roadmap/tasks change.
+- One rule = one testable directive; skills document mandatory workflows.
 - Never commit real secrets, `.env`, or AI-workspace files (SEC-04, SEC-06).
