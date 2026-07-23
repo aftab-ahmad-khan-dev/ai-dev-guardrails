@@ -283,14 +283,20 @@ rules:
   - Shared components/ui/ for buttons, inputs, cards, badges.
   - Enforce class ordering via prettier-plugin-tailwindcss when available.
   - Avoid cliché AI looks (purple-on-white gradients, cream+terracotta kits, glow pill spam) unless brand requires them.
+  - Stats/metrics sections use a visible full-width bottom border or token-based divider unless an approved design provides equivalent separation.
+  - Every public metric is realistic and traceable to product data or an approved source; if verified data is unavailable, use labeled placeholders or omit the section.
   do:
   - Establish tokens before building screens.
   - Cards only when they contain interaction.
+  - Use conservative, honestly rounded values backed by a source and state the measurement period where relevant.
+  - Give stats sections consistent spacing and a bottom divider with sufficient contrast.
   dont:
   - Copy-pasting long className strings across files.
   - Hardcoded brand colors outside the token file.
   - Inline style={{ }} for anything expressible via Tailwind.
-  ai_directive: Use design tokens and a shared UI kit. Avoid arbitrary values and generic AI aesthetics. Extract repeated utility patterns into components.
+  - 'Fabricated vanity claims such as 900+ Integrations, 99.99% Uptime, 200+ Currencies, or <3 wks Typical go-live without documented evidence.'
+  - Removing the stats section bottom border so it visually merges into the next section.
+  ai_directive: Use design tokens and a shared UI kit. Stats sections require a visible token-based bottom border and credible, sourced values; never generate inflated or unsupported metrics. Avoid arbitrary values and generic AI aesthetics.
 - id: CS-13
   title: Routing & Navigation
   status: complete

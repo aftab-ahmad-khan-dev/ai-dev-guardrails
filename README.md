@@ -1,10 +1,49 @@
 # Ai-dev-guardrails — AI Development Rules & Skills
 
-Reusable **rules** and **skills** for **Cursor**, **Claude**, **Copilot**, and any AI coding assistant.  
+Reusable **rules** and **skills** for **Cursor**, **Claude**, **Copilot**, **Codex**, **Gemini**, and any AI coding assistant.  
 Keep code clean, modular, secure, and consistent — without forcing rules that do not apply to your project.
 
 **Repository:** https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails  
-**Version:** 2.2.0
+**Version:** 2.3.1
+
+---
+
+## Install in any AI (skills)
+
+This repo is an **installable Agent Skills pack**. One command wires lifecycle skills into your tool:
+
+```bash
+# Universal — Cursor, Claude Code, Codex, Gemini, OpenCode, …
+npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails
+
+# Browse the 25 skills first
+npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --list
+
+# Meta skill only (SRS + Rules + lifecycle entrypoint)
+npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill ai-dev-guardrails
+
+# Common essentials
+npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill using-agent-skills
+npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill test-driven-development
+npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill code-review-and-quality
+```
+
+After install, keep these at the **project root**:
+
+| File | Role |
+|------|------|
+| [`SRS.md`](SRS.md) | Project description + living task board |
+| [`Rules.md`](Rules.md) | Standards (or copy the YAML packs you need) |
+
+Full per-tool guides: [`INSTALL.md`](INSTALL.md) · [`docs/getting-started.md`](docs/getting-started.md) · [`docs/`](docs/README.md)
+
+**Manual / paste:** load [`skills/ai-dev-guardrails/SKILL.md`](skills/ai-dev-guardrails/SKILL.md) into the system prompt, then add other `skills/*/SKILL.md` as needed.
+
+**Cursor (local sync from clone):**
+
+```bash
+mkdir -p .cursor/skills && rsync -a skills/ .cursor/skills/
+```
 
 ---
 
@@ -12,20 +51,27 @@ Keep code clean, modular, secure, and consistent — without forcing rules that 
 
 | Goal | Use this |
 |------|----------|
-| **Project description & tasks** | [`SRS.md`](SRS.md) — living requirements + version/date task board (AI reads & updates this) |
-| **Everything in one file** | [`Rules.md`](Rules.md) — rules + SRS skills + naming + security scans |
+| **Install skills** | [`INSTALL.md`](INSTALL.md) · `npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails` |
+| **Meta skill** | [`skills/ai-dev-guardrails`](skills/ai-dev-guardrails/SKILL.md) |
+| **Project description & tasks** | [`SRS.md`](SRS.md) — living requirements + version/date task board |
+| **Everything in one file** | [`Rules.md`](Rules.md) — SRS + LIFECYCLE skills + CS/SS/SEC/OPS + scans |
+| **Lifecycle skills** | [`skills/`](skills/README.md) — Define → Plan → Build → Verify → Review → Ship |
+| **Personas / checklists / commands** | [`agents/`](agents/README.md) · [`references/`](references/README.md) · [`commands/`](commands/README.md) |
 | **Category YAML packs** | `client_side/`, `server_side/`, `security/`, `devops/` |
 | **Deploy workflow starters** | [`devops/pipelines/`](devops/pipelines/) |
+| **Agent entrypoint** | [`AGENTS.md`](AGENTS.md) |
 
 **Paste into your AI system prompt:**
 
 ```text
-This pack is rules AND skills.
-1. Read SRS.md first for project description and open tasks.
-2. Follow Rules.md (applicable sections only — see README matrix).
-3. After each task is done, mark it complete in SRS.md and refresh status / Last updated.
-4. Extend SRS.md tasks by version and/or date when scope grows.
-5. At the end, output the Compliance Report template from the README.
+This pack is rules AND skills (installable via npx skills).
+1. Follow skill ai-dev-guardrails (or read SRS.md + Rules.md + skills/).
+2. Read SRS.md first for project description and open tasks.
+3. Apply Rules.md (applicable sections only — see README matrix).
+4. Use matching lifecycle skills from skills/ (spec, TDD, review, ship, …).
+5. After each task is done, mark it complete in SRS.md and refresh status / Last updated.
+6. Extend SRS.md tasks by version and/or date when scope grows.
+7. At the end, output the Compliance Report template from the README.
 ```
 
 ---
@@ -43,18 +89,19 @@ This pack is rules AND skills.
 | **Server-side** (SS-*) | ⚙️ Context | Backend, API, or serverless routes exist |
 | **DevOps** (OPS-*) | ⚙️ Context | CI/CD, Docker, or a deploy target exists |
 | **Platform playbooks** (OPS-03–08) | ⚙️ One only | Match your host (Vercel, EC2, Railway, …) |
+| **Lifecycle skills** (`skills/`) | ✅ Usually | Match the current phase (don’t load all 25 at once) |
 
 ### Examples
 
 | Project | Apply | Skip / N/A |
 |---------|--------|------------|
-| Static marketing site (React) | CS-*, naming, SEC-02–06, SEC-10, scans | SS-*, OPS-03–08 (unless Vercel deploy) |
-| Full-stack SaaS | CS-*, SS-*, security, devops, scans | Only unused platform playbooks |
-| API-only (no frontend) | SS-*, naming, security, devops | CS-07 (SEO/OG), CS-09 (motion), CS-20 (PWA) |
-| Library / CLI | Naming, SEC-02–06, scans | CS-*, most OPS deploy rules |
-| Local prototype | Naming, SEC-02–06 (no real secrets) | Strict CI gates until shipping |
+| Static marketing site (React) | CS-*, naming, SEC-02–06, SEC-10, scans, frontend/TDD skills | SS-*, OPS-03–08 (unless Vercel deploy) |
+| Full-stack SaaS | CS-*, SS-*, security, devops, scans, full lifecycle skills | Only unused platform playbooks |
+| API-only (no frontend) | SS-*, naming, security, devops, API/TDD skills | CS-07 (SEO/OG), CS-09 (motion), CS-20 (PWA), frontend-ui skill |
+| Library / CLI | Naming, SEC-02–06, scans, TDD + review skills | CS-*, most OPS deploy rules |
+| Local prototype | Naming, SEC-02–06 (no real secrets), lightweight skills | Strict CI gates until shipping |
 
-**AI instruction:** Before generating code, state which sections you are applying and why. Mark skipped sections `N/A` in the compliance report — do not invent backend or deploy rules for a frontend-only task.
+**AI instruction:** Before generating code, state which rule sections **and** which lifecycle skills you are applying and why. Mark skipped sections `N/A` in the compliance report — do not invent backend or deploy rules for a frontend-only task.
 
 ---
 
@@ -63,26 +110,52 @@ This pack is rules AND skills.
 ```
 ai-dev-guardrails/
 ├── SRS.md                   # ← Project description + version/date task board (template)
-├── Rules.md                 # ← Rules + SRS skills + all standards in one file
-├── README.md                # ← This file (how to apply + report template)
-├── client_side/             # CS-01…CS-20 (YAML)
-├── server_side/             # SS-01…SS-20 (YAML)
-├── security/                # SEC-01…SEC-20 (YAML)
-└── devops/                  # OPS-01…OPS-20 (YAML) + pipelines/
+├── Rules.md                 # ← Rules + SRS/LIFECYCLE skills + all standards in one file
+├── AGENTS.md                # ← Agent entrypoint (SRS + rules + skills)
+├── README.md                # ← This file (install + how to apply + report template)
+├── plugin.json              # ← Pack manifest (name / version)
+├── skills/                  # ← 25 installable skills (SKILL.md) + banner
+├── agents/                  # ← Specialist personas (reviewer, security, …)
+├── references/              # ← Checklists (DoD, security, a11y, perf, …)
+├── commands/                # ← Slash-command stubs (+ commands/claude/)
+├── hooks/                   # ← Session lifecycle hooks
+├── docs/                    # ← Per-tool setup (Cursor, Claude, Copilot, …)
+├── client_side/             # CS-01…CS-20 (YAML) + banner
+├── server_side/             # SS-01…SS-20 (YAML) + banner
+├── security/                # SEC-01…SEC-20 (YAML) + banner
+└── devops/                  # OPS-01…OPS-20 (YAML) + pipelines/ + banners
 ```
 
 YAML packs and `Rules.md` stay in sync. Prefer **`Rules.md`** for a single paste; use **folder YAML** when you only need one layer.  
-Copy **`SRS.md`** into each consuming project and fill description + tasks — that file is the living backlog the AI must maintain.
+Copy **`SRS.md`** into each consuming project and fill description + tasks — that file is the living backlog the AI must maintain.  
+Prefer **`npx skills add`** so skills land in the correct agent directory; or sync **`skills/`** into `.cursor/skills/` for Cursor (see [`skills/README.md`](skills/README.md)).
 
 ---
 
 ## Rules vs skills
 
-| | **Rules** | **Skills** |
-|---|-----------|------------|
-| **What** | Quality / security / delivery standards (CS-*, SS-*, SEC-*, OPS-*) | How the AI must run a project day-to-day |
-| **Where** | `Rules.md` §§1–6 + YAML packs | `Rules.md` §0 (SRS-01, SRS-02) + this README |
-| **Example** | “No file over 400 LOC” | “Read `SRS.md`, finish `T-003`, mark `done`” |
+| | **Rules** | **SRS skills** | **Lifecycle skills** |
+|---|-----------|----------------|----------------------|
+| **What** | Quality / security / delivery standards (CS-*, SS-*, SEC-*, OPS-*) | How the AI runs the task board | Engineering workflows (spec, TDD, review, ship) |
+| **Where** | `Rules.md` §§1–6 + YAML packs | `Rules.md` §0 (SRS-01, SRS-02) | `skills/*/SKILL.md` (25) · Rules §0 LIFECYCLE-* |
+| **Install** | Paste / copy YAML | Included in meta skill | `npx skills add …` |
+| **Example** | “No file over 400 LOC” | “Read `SRS.md`, finish `T-003`, mark `done`” | “Red-green-refactor before merge” |
+
+---
+
+## Lifecycle skill map
+
+| Phase | Command | Skills |
+|-------|---------|--------|
+| Meta | — | `ai-dev-guardrails`, `using-agent-skills` |
+| Define | `/spec` | `interview-me`, `idea-refine`, `spec-driven-development` |
+| Plan | `/plan` | `planning-and-task-breakdown` |
+| Build | `/build` | `incremental-implementation`, `test-driven-development`, `frontend-ui-engineering`, `api-and-interface-design`, `context-engineering`, `source-driven-development`, `doubt-driven-development` |
+| Verify | `/test` | `browser-testing-with-devtools`, `debugging-and-error-recovery` |
+| Review | `/review` | `code-review-and-quality`, `code-simplification`, `security-and-hardening`, `performance-optimization` |
+| Ship | `/ship` | `git-workflow-and-versioning`, `ci-cd-and-automation`, `deprecation-and-migration`, `documentation-and-adrs`, `observability-and-instrumentation`, `shipping-and-launch` |
+
+Also: `/webperf`, `/code-simplify` — see [`commands/`](commands/README.md). Personas: [`agents/`](agents/README.md). Checklists: [`references/`](references/README.md).
 
 ---
 
@@ -92,10 +165,11 @@ Copy **`SRS.md`** into each consuming project and fill description + tasks — t
 
 1. **Read `SRS.md`** — project description, roadmap, and open tasks (by version and/or date).
 2. **Pick a task** — prefer current-version `todo` / continue `in_progress`; announce the task ID.
-3. **Apply rules** — only sections that match project type (matrix below).
-4. **Mark complete** — set status `done`, fill **Completed** date + **Notes**, bump **Last updated**.
-5. **Extend when needed** — add rows under a version section or a dated backlog; update roadmap when versions change.
-6. **Report** — emit the compliance report after a reviewable slice.
+3. **Choose lifecycle skill(s)** — from the map above (or follow `ai-dev-guardrails` / `using-agent-skills`).
+4. **Apply rules** — only sections that match project type (matrix above).
+5. **Mark complete** — set status `done`, fill **Completed** date + **Notes**, bump **Last updated**.
+6. **Extend when needed** — add rows under a version section or a dated backlog; update roadmap when versions change.
+7. **Report** — emit the compliance report after a reviewable slice.
 
 Do not delete task history; use `cancelled` with a reason. If `SRS.md` is missing, scaffold from this template before large work.
 
@@ -103,15 +177,17 @@ Do not delete task history; use `cancelled` with a reason. If `SRS.md` is missin
 
 ## How AI should follow rules effectively
 
-1. **Read `SRS.md`** — description, current version, open tasks.
-2. **Read applicability** — Confirm project type (frontend / backend / full-stack / deploy target).
-3. **Load relevant sections** — From `Rules.md` or merged YAML packs.
-4. **Respect existing conventions** — Server rules extend the boilerplate; naming mirrors the codebase.
-5. **Refuse violations** — No secrets in code, no `.cursor/` in commits, no proprietary logic in client bundles.
-6. **Estimate file size** — Split before 400 LOC (CS-01 / SS-01).
-7. **Update `SRS.md`** — mark finished tasks `done`; extend by version/date if scope grew.
-8. **Before push, run the local gate** — tests, lint/typecheck, dependency audit, secret scan, client-exposure scan, and build where configured. Fix failures before pushing.
-9. **Emit compliance report** — After implementation or review (template below); include SRS task IDs in **Scope**.
+1. **Load meta skill** — Prefer `ai-dev-guardrails` when this pack is installed.
+2. **Read `SRS.md`** — description, current version, open tasks.
+3. **Choose lifecycle skill(s)** — From `skills/` when the work matches (spec, plan, TDD, review, ship, …).
+4. **Read applicability** — Confirm project type (frontend / backend / full-stack / deploy target).
+5. **Load relevant sections** — From `Rules.md` or merged YAML packs.
+6. **Respect existing conventions** — Server rules extend the boilerplate; naming mirrors the codebase.
+7. **Refuse violations** — No secrets in code, no `.cursor/` in commits, no proprietary logic in client bundles.
+8. **Estimate file size** — Split before 400 LOC (CS-01 / SS-01).
+9. **Update `SRS.md`** — mark finished tasks `done`; extend by version/date if scope grew.
+10. **Before push, run the local gate** — tests, lint/typecheck, dependency audit, secret scan, client-exposure scan, and build where configured. Fix failures before pushing.
+11. **Emit compliance report** — After implementation or review (template below); include SRS task IDs and skill names in **Scope**.
 
 ### Always-on (every project)
 
@@ -127,6 +203,7 @@ Do not delete task history; use `cancelled` with a reason. If `SRS.md` is missin
 
 - Skip server-side rules (§2) unless adding an API later
 - Keep client env rules (CS-16) — client bundle is still public
+- Stats sections require a visible bottom border/divider and realistic, sourced metrics. Never fabricate vanity numbers; use labeled placeholders or omit the section when evidence is unavailable (CS-12).
 - Skip DB migrations, RBAC server rules, CORS unless calling an external API
 
 ### Common-only (no deployment yet)
@@ -149,6 +226,7 @@ Use clear status icons and honest `N/A` when a category does not apply.
 ║  Type    : <e.g. React SPA · no backend · Vercel deploy>         ║
 ║  Date    : <ISO date>                                            ║
 ║  SRS     : <task IDs e.g. T-002, T-003 — statuses updated in SRS.md> ║
+║  Skills  : <e.g. ai-dev-guardrails, test-driven-development>         ║
 ║  Scope   : <what was built or reviewed>                          ║
 ╚══════════════════════════════════════════════════════════════════╝
 
@@ -206,6 +284,7 @@ Status legend:
 - List which scans ran and which were skipped (with reason).
 - Include specific rule IDs (CS-*, SS-*, SEC-*, OPS-*) for `WARN` and `FAIL`.
 - Confirm `SRS.md` was updated for every completed task ID listed under **SRS**.
+- List which lifecycle skills were followed (or `N/A` if none matched).
 - End with a one-line **Verdict**: safe to proceed / fix required / blocked.
 
 ---
@@ -249,14 +328,20 @@ rules:
 | Pack | File | Count | Focus |
 |------|------|-------|-------|
 | SRS board | [SRS.md](SRS.md) | template | Project description + version/date tasks |
-| All | [Rules.md](Rules.md) | SRS skills + 80 + naming + scans | Rules & skills in one file |
+| All | [Rules.md](Rules.md) | SRS + LIFECYCLE + 80 + naming + scans | Rules & skills in one file |
+| [skills](skills/README.md) | lifecycle | 25 | Spec → plan → build → verify → review → ship (+ meta) |
+| [agents](agents/README.md) | personas | 4 | Reviewer, test, security, webperf |
+| [references](references/README.md) | checklists | 7 | DoD, testing, security, a11y, perf, … |
+| [commands](commands/README.md) | slash cmds | 8 | `/spec` `/plan` `/build` `/test` `/review` `/ship` … |
+| [hooks](hooks/README.md) | session | scripts | Session-start / cache hooks |
+| [docs](docs/README.md) | guides | multi | Install on Cursor, Claude, Copilot, … |
 | [client_side](client_side/README.md) | `CS` | 20 | Modularity, UX, a11y, SEO, Tailwind |
 | [server_side](server_side/README.md) | `SS` | 20 | Layers, REST, auth, jobs, migrations |
 | [security](security/README.md) | `SEC` | 20 | Confidentiality, AI safety, injection |
 | [devops](devops/README.md) | `OPS` | 20 | CI/CD, platforms, pipelines |
 | [pipelines](devops/pipelines/README.md) | Actions | 6 starters | Platform deploy workflow templates |
 
-Each category folder README includes a thematic `banner.jpg` for GitHub browsing.
+Each category folder README includes a thematic `banner.jpg` for GitHub browsing (rules packs + skills / agents / references / commands / hooks / docs).
 
 ---
 
@@ -265,11 +350,15 @@ Each category folder README includes a thematic `banner.jpg` for GitHub browsing
 This project is licensed under the [MIT License](LICENSE).  
 Copyright (c) 2026 Aftab Ahmad Khan.
 
+Portions of the lifecycle skill pack were adapted from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills); required upstream notice is retained in [LICENSE](LICENSE).
+
 ---
 
 ## Contributing
 
+- Update install docs when the public GitHub skills path or `npx skills` flags change.
 - Keep `Rules.md` in sync when YAML packs change.
 - Keep `SRS.md` current when this pack’s own roadmap/tasks change.
+- When refreshing lifecycle skills, keep the upstream notice in `LICENSE` and re-check Cursor docs paths.
 - One rule = one testable directive; skills document mandatory workflows.
 - Never commit real secrets, `.env`, or AI-workspace files (SEC-04, SEC-06).

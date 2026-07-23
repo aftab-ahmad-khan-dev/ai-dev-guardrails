@@ -42,4 +42,10 @@ into your AI tool before generating UI code.
 - Never hardcode production Meta Pixel, Clarity, GA, Sentry, or similar IDs as literals, fallback strings, or arrays. Use validated client-safe deployment env vars with placeholder-only examples.
 - Keep actual credentials and privileged vendor operations server-side; consent-gate all tracking.
 
+## Stats-section visual and content rule
+
+- Add a visible, full-width bottom border/divider to stats sections so they do not merge into the next section.
+- Use only realistic metrics supported by product data or an approved source. Never invent inflated claims such as `900+ Integrations`, `99.99% Uptime`, `200+ Currencies`, or `<3 wks Typical go-live`.
+- If verified figures are unavailable, use clearly labeled placeholders or remove the stats section.
+
 > **Status:** All 20 rules are fully written (`status: complete`).

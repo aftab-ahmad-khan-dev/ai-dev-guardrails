@@ -1,11 +1,13 @@
 # Rules.md — AI Development Rules & Skills (All-in-One)
 
-> **Version:** 2.2.0 · **Updated:** 2026-07-21  
+> **Version:** 2.3.1 · **Updated:** 2026-07-23  
 > **Repository:** https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails
 > 
-> Single-file **rules + skills** reference for Cursor, Claude, Copilot, and project `.cursor/rules`.
+> Single-file **rules + skills** reference for Cursor, Claude, Copilot, Codex, Gemini, and any agent.
+> **Install this pack:** `npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails` — see [README.md](README.md).
 > **Project detail & tasks live in [`SRS.md`](SRS.md)** — read it first; update status after each done task.
-> For **how to apply by project type** and the **compliance report template**, see [README.md](README.md).
+> **Lifecycle skills** (25 × `SKILL.md`): [`skills/`](skills/) — entrypoint [`ai-dev-guardrails`](skills/ai-dev-guardrails/SKILL.md).
+> For **applicability matrix**, **lifecycle map**, and **compliance report**, see [README.md](README.md).
 
 ## Table of Contents
 
@@ -20,12 +22,23 @@
 ---
 ## 0. Rules, Skills & SRS Workflow
 
-This pack is both **rules** (what good code must satisfy) and **skills** (how the AI must operate on a project).
+This pack is both **rules** (what good code must satisfy) and **skills** (how the AI must operate on a project). It installs as Agent Skills for any AI tool.
 
 | Kind | Role |
 |------|------|
 | **Rules** | CS-*, SS-*, naming, SEC-*, OPS-*, scans — quality, security, and delivery standards |
-| **Skills** | Repeatable workflows: read SRS → pick task → implement under rules → mark complete → report |
+| **SRS skills** | Board workflow: read SRS → pick task → implement under rules → mark complete → report |
+| **Lifecycle skills** | Engineering workflows in [`skills/`](skills/) (25): `/spec` → `/plan` → `/build` → `/test` → `/review` → `/ship` |
+| **Meta skill** | [`ai-dev-guardrails`](skills/ai-dev-guardrails/SKILL.md) — entrypoint that wires SRS + Rules + lifecycle |
+
+### Install (any AI)
+
+```bash
+npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails
+npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill ai-dev-guardrails
+```
+
+Keep `SRS.md` + this file (or YAML packs) at the project root. Guides: [`docs/getting-started.md`](docs/getting-started.md).
 
 ### Skill SRS-01 — Always read `SRS.md` first
 
@@ -52,7 +65,7 @@ This pack is both **rules** (what good code must satisfy) and **skills** (how th
 - Delete completed tasks; keep them as history.
 - Expand scope into new features without adding tasks to `SRS.md` (or getting human approval first).
 
-**AI directive:** Read `SRS.md` first. Execute open tasks under applicable CS/SS/SEC/OPS rules. On every completion, update `SRS.md` status (and version/date sections as needed). Emit the compliance report from the README when the slice is reviewable.
+**AI directive:** Read `SRS.md` first. Execute open tasks under applicable CS/SS/SEC/OPS rules **and** matching lifecycle skills. On every completion, update `SRS.md` status (and version/date sections as needed). Emit the compliance report from the README when the slice is reviewable.
 
 ### Skill SRS-02 — Version- and date-wise task extension
 
@@ -67,6 +80,51 @@ This pack is both **rules** (what good code must satisfy) and **skills** (how th
 - Sync **Current version** and roadmap table when starting a new version.
 
 **AI directive:** When the human adds scope (“also do X in v0.2” / “by Friday”), extend `SRS.md` with the new task row(s) under the correct version or date, then execute from that board.
+
+### Skill LIFECYCLE-01 — Use matching lifecycle skills from `skills/`
+
+> **Severity:** `high` · **Status:** `complete`
+
+**Summary:** When work matches a lifecycle skill (spec, plan, TDD, review, security, ship, …), follow that skill’s process in [`skills/<name>/SKILL.md`](skills/). Do not invent a weaker ad-hoc process.
+
+**Rules**
+- Pack entrypoint → [`skills/ai-dev-guardrails`](skills/ai-dev-guardrails/SKILL.md).
+- Unsure which skill applies → [`skills/using-agent-skills`](skills/using-agent-skills/SKILL.md).
+- New/underspecified work → `interview-me` / `idea-refine` / `spec-driven-development` before large coding.
+- Implementation → prefer `incremental-implementation` + `test-driven-development`.
+- UI → `frontend-ui-engineering`; API/boundaries → `api-and-interface-design`.
+- Before merge → `code-review-and-quality` (and `security-and-hardening` when auth/input/data are involved).
+- Still enforce applicable CS/SS/SEC/OPS rules; lifecycle skills do not replace the compliance report.
+- Do **not** load all 25 skills into context at once — only the phase that matches the current task.
+
+**Lifecycle map (quick)**
+
+| Phase | Skills |
+|-------|--------|
+| Meta | `ai-dev-guardrails`, `using-agent-skills` |
+| Define | `interview-me`, `idea-refine`, `spec-driven-development` |
+| Plan | `planning-and-task-breakdown` |
+| Build | `incremental-implementation`, `test-driven-development`, `frontend-ui-engineering`, `api-and-interface-design`, `context-engineering`, `source-driven-development`, `doubt-driven-development` |
+| Verify | `browser-testing-with-devtools`, `debugging-and-error-recovery` |
+| Review | `code-review-and-quality`, `code-simplification`, `security-and-hardening`, `performance-optimization` |
+| Ship | `git-workflow-and-versioning`, `ci-cd-and-automation`, `deprecation-and-migration`, `documentation-and-adrs`, `observability-and-instrumentation`, `shipping-and-launch` |
+
+Supporting trees: [`agents/`](agents/) (personas), [`references/`](references/) (checklists), [`commands/`](commands/) (slash commands), [`hooks/`](hooks/), [`docs/`](docs/).
+
+**AI directive:** After reading `SRS.md`, select and follow the matching skill(s) under `skills/`, then apply Rules §§1–6 for the project type. Name the skills used in the compliance report.
+
+### Skill LIFECYCLE-02 — Prefer the installable meta skill
+
+> **Severity:** `medium` · **Status:** `complete`
+
+**Summary:** When this pack is installed via `npx skills` (or synced into the agent skills directory), prefer invoking **`ai-dev-guardrails`** as the session entrypoint so SRS + Rules + lifecycle discovery stay consistent.
+
+**Rules**
+- If `ai-dev-guardrails` is available to the agent, follow it before ad-hoc interpretation of this file alone.
+- Still respect project-type applicability (README matrix) — the meta skill does not force unused CS/SS/OPS packs.
+- When installing for a new project, recommend `npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails` plus copying `SRS.md` / `Rules.md` (or YAML packs).
+
+**AI directive:** On pack-aware sessions, start from `ai-dev-guardrails`; otherwise follow §0 SRS-01 → LIFECYCLE-01 → §§1–6.
 
 ---
 ## 1. Client-Side Rules
@@ -448,17 +506,23 @@ src/store/
 - Shared components/ui/ for buttons, inputs, cards, badges.
 - Enforce class ordering via prettier-plugin-tailwindcss when available.
 - Avoid cliché AI looks (purple-on-white gradients, cream+terracotta kits, glow pill spam) unless brand requires them.
+- Stats/metrics sections use a visible bottom border or divider (`border-b` with a design-token color) to separate them from the following section, unless an approved design explicitly provides equivalent separation.
+- Every public metric must be realistic and traceable to product data or an approved source. If verified data is unavailable, use clearly labeled placeholders or omit the stats section—never invent impressive numbers.
 
 **Do**
 - Establish tokens before building screens.
 - Cards only when they contain interaction.
+- Use conservative, exact or honestly rounded values backed by a source and state the measurement period where relevant.
+- Give stats sections consistent vertical spacing and a full-width bottom divider with sufficient contrast.
 
 **Don't**
 - Copy-pasting long className strings across files.
 - Hardcoded brand colors outside the token file.
 - Inline style={{ }} for anything expressible via Tailwind.
+- Fabricated vanity claims such as `900+ Integrations`, `99.99% Uptime`, `200+ Currencies`, or `<3 wks Typical go-live` without documented evidence.
+- Removing the stats section’s bottom border so it visually merges into the next section.
 
-**AI directive:** Use design tokens and a shared UI kit. Avoid arbitrary values and generic AI aesthetics. Extract repeated utility patterns into components.
+**AI directive:** Use design tokens and a shared UI kit. Stats sections require a visible token-based bottom border and credible, sourced values; never generate inflated or unsupported metrics. Avoid arbitrary values and generic AI aesthetics.
 
 ---
 
