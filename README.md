@@ -6,7 +6,8 @@ Reusable **rules** and **skills** for **Cursor**, **Claude**, **Copilot**, **Cod
 Keep code clean, modular, secure, and consistent — without forcing rules that do not apply to your project.
 
 **Repository:** https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails  
-**Version:** 2.6.0
+**Version:** 2.6.0  
+**By Aftab Ahmad Khan**
 
 ---
 
@@ -357,6 +358,10 @@ rules:
 Each category folder README includes a thematic `banner.jpg` for GitHub browsing (root + `client` / `server` / `security` / `devops` + `skills` / `design` / `agents` / `references` / `commands` / `hooks` / `docs`).
 
 ---
+
+## Author
+
+**By Aftab Ahmad Khan** · [GitHub](https://github.com/aftab-ahmad-khan-dev)
 
 ## License
 

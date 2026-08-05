@@ -1,5 +1,7 @@
 {
   "name": "ai-dev-guardrails",
   "version": "2.6.0",
-  "description": "Rules + lifecycle + 60+ design approaches + project functionality scan. Slash command decks, REPORT.md, SCAN-REPORT.svg."
+  "description": "Rules + lifecycle + 60+ design approaches + project functionality scan. Slash command decks, REPORT.md, SCAN-REPORT.svg.",
+  "author": "Aftab Ahmad Khan",
+  "homepage": "https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails"
 }

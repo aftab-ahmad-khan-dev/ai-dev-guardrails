@@ -3,7 +3,8 @@
 Install **ai-dev-guardrails** as Agent Skills in Cursor, Claude Code, Codex, Gemini CLI, Copilot, OpenCode, Windsurf, and any tool that supports `SKILL.md`.
 
 **Version:** 2.6.0  
-**Repo:** https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails
+**Repo:** https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails  
+**By Aftab Ahmad Khan**
 
 ---
 

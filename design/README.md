@@ -2,6 +2,8 @@
 
 ![Design — anti-slop UI, steer vocabulary, motion craft](banner.jpg)
 
+**By Aftab Ahmad Khan**
+
 Production design skills for AI coding agents — taste, steer vocabulary, visual styles, motion craft, and workflows.
 
 Inspired by [Taste Skill](https://www.tasteskill.dev/), [Impeccable](https://impeccable.style/), and [Emil Kowalski’s skills](https://emilkowal.ski/skill). Original writing for this pack. See [`SAFETY.md`](SAFETY.md) before install.

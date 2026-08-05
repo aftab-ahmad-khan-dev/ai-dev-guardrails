@@ -1,0 +1,13 @@
+{
+  "name": "ai-dev-guardrails",
+  "version": "2.6.0",
+  "private": true,
+  "description": "Rules + lifecycle + design skills for AI coding agents",
+  "author": "Aftab Ahmad Khan",
+  "license": "MIT",
+  "homepage": "https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails.git"
+  }
+}
