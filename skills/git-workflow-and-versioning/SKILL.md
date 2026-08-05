@@ -5,6 +5,15 @@ description: Structures git workflow practices. Use when making any code change.
 
 # Git Workflow and Versioning
 
+
+## ⚡ Command
+
+```text
+/git-workflow-and-versioning
+# or ask the agent:
+use skill git-workflow-and-versioning
+```
+
 ## Overview
 
 Git is your safety net. Treat commits as save points, branches as sandboxes, and history as documentation. With AI agents generating code at high speed, disciplined version control is the mechanism that keeps changes manageable, reviewable, and reversible.
@@ -337,6 +346,13 @@ Write the entry in the same change that makes the change, while the impact is fr
 - A release with no tag, or a version number hand-edited out of sync with the tag
 - A user-facing release with no changelog entry, or a changelog that's just dumped commit messages
 
+## Before every push
+
+1. Run skill `push-report` (or `bash skills/push-report/scripts/generate-push-report.sh`).
+2. Confirm `REPORT.md` shows **PUSH OK** (or user explicitly accepts WARN).
+3. **Never** push when secrets scan is `FAIL`.
+4. Follow `safe-file-ops` — never `git clean -fdx` / `reset --hard` unless the user asked.
+
 ## Verification
 
 For every commit:
@@ -347,6 +363,7 @@ For every commit:
 - [ ] No secrets in the diff
 - [ ] No formatting-only changes mixed with behavior changes
 - [ ] `.gitignore` covers standard exclusions
+- [ ] Before push: `REPORT.md` updated via `push-report`
 
 For every release (anything with consumers):
 

@@ -9,8 +9,8 @@
 |-------|--------|
 | **Project** | Ai-dev-guardrails |
 | **Repository** | https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails |
-| **Current version** | `2.3.1` |
-| **Last updated** | `2026-07-23` |
+| **Current version** | `2.6.0` |
+| **Last updated** | `2026-08-05` |
 | **Owner** | aftab-ahmad-khan-dev |
 
 ---
@@ -37,6 +37,7 @@
 - Ship one-file (`Rules.md`) and category YAML packs for client, server, security, and DevOps.
 - Treat delivery as a skill: read `SRS.md`, execute tasks, mark complete, extend by version/date.
 - Bundle lifecycle skills (spec → ship) under `skills/` as part of this pack.
+- Bundle design skills (anti-slop / steer / motion) under `design/` (mirrored into `skills/`).
 - Keep applicability matrix so unused layers are honestly `N/A`.
 
 **Out of scope**
@@ -54,7 +55,7 @@
 - No secrets or AI workspace caches in git.
 
 **Success criteria**
-- AI system prompts can point at `SRS.md` + `Rules.md` + `skills/` and follow the board end-to-end.
+- AI system prompts can point at `SRS.md` + `Rules.md` + `skills/` (+ `design/` for UI taste) and follow the board end-to-end.
 - Each finished task leaves an updated status row in `SRS.md`.
 
 ---
@@ -67,7 +68,10 @@
 | `2.2.0` | `2026-07-21` | Rules & skills + SRS-driven workflow | `done` |
 | `2.3.0` | `2026-07-23` | Lifecycle skills pack (`skills/` + agents/commands/docs) | `done` |
 | `2.3.1` | `2026-07-23` | README + Rules sync for installable skills pack | `done` |
-| `2.4.0` | `TBD` | Optional Cursor rule/skill export helpers | `todo` |
+| `2.4.0` | `2026-08-05` | Design skill pack (`design/`) — anti-slop, steer, motion | `done` |
+| `2.5.0` | `2026-08-05` | 60+ design approaches, safe-file-ops, push REPORT.md | `done` |
+| `2.6.0` | `2026-08-05` | Project functionality scan + skill commands catalogs | `done` |
+| `2.7.0` | `TBD` | Optional Cursor rule/skill export helpers | `todo` |
 
 ---
 
@@ -107,7 +111,31 @@
 
 ---
 
-### Version `2.4.0` · planned
+### Version `2.4.0` · started `2026-08-05`
+
+| ID | Task | Priority | Status | Completed | Notes |
+|----|------|----------|--------|-----------|-------|
+| T-030 | Create `design/` skill pack inspired by Taste / Impeccable / Emil approaches | high | `done` | 2026-08-05 | 10 skills + 4 refs; original writing |
+| T-031 | Wire design pack into AGENTS, README, INSTALL, Rules, meta skill | high | `done` | 2026-08-05 | LICENSE attribution + v2.4.0 |
+| T-032 | Mirror design skills into `skills/` for `npx skills add` discovery | medium | `done` | 2026-08-05 | Canonical in design/; mirrored in skills/ |
+
+### Version `2.5.0` · started `2026-08-05`
+
+| ID | Task | Priority | Status | Completed | Notes |
+|----|------|----------|--------|-----------|-------|
+| T-040 | Extend design pack to 50–70 approaches (Taste/Impeccable/Emil-class) | high | `done` | 2026-08-05 | 68 approaches + 11 core |
+| T-041 | Find/fix local repo wipe risk (safe-file-ops + install/hooks) | critical | `done` | 2026-08-05 | SAFETY.md, safe-file-ops, prototype sandbox, hook path guards |
+| T-042 | Add push-report skill + REPORT.md generator | high | `done` | 2026-08-05 | skills/push-report + REPORT.md |
+
+### Version `2.6.0` · started `2026-08-05`
+
+| ID | Task | Priority | Status | Completed | Notes |
+|----|------|----------|--------|-----------|-------|
+| T-050 | Add project-functionality-scan skill + SCAN-REPORT.md/SVG | high | `done` | 2026-08-05 | /scan + scripts |
+| T-051 | Add Command section to every SKILL.md + folder COMMANDS.md catalogs | high | `done` | 2026-08-05 | inject script + 3 COMMANDS.md decks |
+| T-052 | Wire `/scan` command + README/AGENTS | medium | `done` | 2026-08-05 | scan.toml + claude/scan.md |
+
+### Version `2.7.0` · planned
 
 | ID | Task | Priority | Status | Completed | Notes |
 |----|------|----------|--------|-----------|-------|
@@ -136,6 +164,7 @@
 |------|---------------------|--------|---------|
 | `2026-07-21` | SRS is mandatory source of truth for tasks in consuming projects | `decided` | Documented in Rules §0 + README |
 | `2026-07-23` | Lifecycle skills are part of this pack under project LICENSE | `decided` | `skills/` + related trees; upstream notice retained in LICENSE |
+| `2026-08-05` | Design pack lives in `design/` (canonical) and mirrors into `skills/` for install | `decided` | Approaches inspired by Taste / Impeccable / Emil; original text |
 
 ---
 
@@ -143,6 +172,9 @@
 
 | Date | Version | Change |
 |------|---------|--------|
+| `2026-08-05` | `2.6.0` | project-functionality-scan; SCAN-REPORT.svg; skill Command decks |
+| `2026-08-05` | `2.5.0` | 68 design approaches; safe-file-ops; push-report → REPORT.md |
+| `2026-08-05` | `2.4.0` | Design skill pack (`design/`) — anti-slop frontend, steer vocabulary, motion craft |
 | `2026-07-23` | `2.3.1` | README + Rules.md updated for installable skills, lifecycle map, LIFECYCLE-02 |
 | `2026-07-23` | `2.3.0` | Folder banners; universal `npx skills` install; meta skill `ai-dev-guardrails` |
 | `2026-07-23` | `2.3.0` | Added lifecycle skills pack (`skills/`, agents, references, commands, hooks, docs) |

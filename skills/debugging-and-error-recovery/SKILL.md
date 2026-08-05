@@ -5,6 +5,15 @@ description: Guides systematic root-cause debugging. Use when tests fail, builds
 
 # Debugging and Error Recovery
 
+
+## ⚡ Command
+
+```text
+/debugging-and-error-recovery
+# or ask the agent:
+use skill debugging-and-error-recovery
+```
+
 ## Overview
 
 Systematic debugging with structured triage. When something breaks, stop adding features, preserve evidence, and follow a structured process to find and fix the root cause. Guessing wastes time. The triage checklist works for test failures, build errors, runtime bugs, and production incidents.

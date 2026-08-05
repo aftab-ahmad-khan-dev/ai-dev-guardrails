@@ -158,3 +158,26 @@ vite.config.ts.timestamp-*
 !.vscode/settings.json.example
 *.swp
 .DS_Store
+
+# ai-dev-guardrails-skills-ignore-start
+# Installed Agent Skills — local/runtime only; do not commit vendor copies.
+# Reinstall with: npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails
+.cursor/skills/
+.claude/skills/
+.agents/skills/
+.codex/skills/
+.gemini/skills/
+.github/skills/
+.opencode/skills/
+.windsurf/skills/
+.trae/skills/
+.trae-cn/skills/
+.rovodev/skills/
+.qoder/skills/
+.vibe/skills/
+.grok/skills/
+.pi/skills/
+.agent/skills/
+skills-lock.json
+**/skills-lock.json
+# ai-dev-guardrails-skills-ignore-end

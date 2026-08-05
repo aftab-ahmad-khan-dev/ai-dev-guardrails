@@ -5,6 +5,15 @@ description: Automates CI/CD pipeline setup. Use when setting up or modifying bu
 
 # CI/CD and Automation
 
+
+## ⚡ Command
+
+```text
+/ci-cd-and-automation
+# or ask the agent:
+use skill ci-cd-and-automation
+```
+
 ## Overview
 
 Automate quality gates so that no change reaches production without passing tests, lint, type checking, and build. CI/CD is the enforcement mechanism for every other skill — it catches what humans and agents miss, and it does so consistently on every single change.

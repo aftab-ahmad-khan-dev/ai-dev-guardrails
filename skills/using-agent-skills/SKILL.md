@@ -5,6 +5,15 @@ description: Discovers and invokes agent skills. Use when starting a session or 
 
 # Using Agent Skills
 
+
+## ⚡ Command
+
+```text
+/using-agent-skills
+# or ask the agent:
+use skill using-agent-skills
+```
+
 ## Overview
 
 Agent Skills is a collection of engineering workflow skills organized by development phase. Each skill encodes a specific process that senior engineers follow. This meta-skill helps you discover and apply the right skill for your current task.
@@ -29,6 +38,7 @@ Task arrives
     │   └── Stakes high / unfamiliar code? ──→ doubt-driven-development
     ├── Writing/running tests? ────────→ test-driven-development
     │   └── Browser-based? ───────────→ browser-testing-with-devtools
+    ├── Full project broken-path scan? → project-functionality-scan (/scan)
     ├── Something broke? ──────────────→ debugging-and-error-recovery
     ├── Reviewing code? ───────────────→ code-review-and-quality
     │   ├── Too complex? ─────────────→ code-simplification

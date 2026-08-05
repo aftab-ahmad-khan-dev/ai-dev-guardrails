@@ -5,6 +5,15 @@ description: Records decisions and documentation. Use when making architectural 
 
 # Documentation and ADRs
 
+
+## ⚡ Command
+
+```text
+/documentation-and-adrs
+# or ask the agent:
+use skill documentation-and-adrs
+```
+
 ## Overview
 
 Document decisions, not just code. The most valuable documentation captures the *why* — the context, constraints, and trade-offs that led to a decision. Code shows *what* was built; documentation explains *why it was built this way* and *what alternatives were considered*. This context is essential for future humans and agents working in the codebase.

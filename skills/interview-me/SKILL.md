@@ -5,6 +5,15 @@ description: Extracts what the user actually wants instead of what they think th
 
 # Interview Me
 
+
+## ⚡ Command
+
+```text
+/interview-me
+# or ask the agent:
+use skill interview-me
+```
+
 ## Overview
 
 What people ask for and what they actually want are different things. They ask for "a dashboard" because that's what one asks for, not because a dashboard solves their problem. They say "make it faster" without a number to hit.

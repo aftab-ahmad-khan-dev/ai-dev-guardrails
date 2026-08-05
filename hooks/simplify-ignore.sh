@@ -17,8 +17,28 @@ if ! command -v jq >/dev/null 2>&1; then
   printf '%s\n' "error: missing jq" >&2; exit 1
 fi
 
-CACHE="${CLAUDE_PROJECT_DIR:-.}/.claude/.simplify-ignore-cache"
+# Resolve project root safely — never treat arbitrary CWD as disposable
+PROJECT_ROOT="${CLAUDE_PROJECT_DIR:-}"
+if [ -z "$PROJECT_ROOT" ]; then
+  PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+fi
+# Normalize and refuse obviously wrong roots
+PROJECT_ROOT="$(cd "$PROJECT_ROOT" 2>/dev/null && pwd || true)"
+if [ -z "$PROJECT_ROOT" ] || [ "$PROJECT_ROOT" = "/" ] || [ "$PROJECT_ROOT" = "$HOME" ]; then
+  printf 'simplify-ignore: refusing unsafe PROJECT_ROOT=%s\n' "${PROJECT_ROOT:-empty}" >&2
+  exit 0
+fi
+CACHE="${PROJECT_ROOT}/.claude/.simplify-ignore-cache"
 if [ -t 0 ]; then INPUT="{}"; else INPUT=$(cat); fi
+
+# Only touch files under PROJECT_ROOT (prevents path escape / wipe-class bugs)
+path_in_project() {
+  local p="$1"
+  case "$p" in
+    "${PROJECT_ROOT}"/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 
 # Parse hook input — trap errors explicitly so set -e doesn't cause
 # a silent exit on malformed JSON, and surface a useful diagnostic.
@@ -150,6 +170,11 @@ if [ -z "$TOOL_NAME" ]; then
     pathfile="$CACHE/${fid}.path"
     [ -f "$pathfile" ] || { rm -f "$bak"; continue; }
     orig=$(cat "$pathfile")
+    if ! path_in_project "$orig"; then
+      printf 'simplify-ignore: skip restore outside project: %s\n' "$orig" >&2
+      rm -f "$bak" "$pathfile"
+      continue
+    fi
     if [ -f "$orig" ]; then
       cat "$bak" > "$orig"
       rm -f "$bak" "$pathfile" "$CACHE/${fid}".block.* "$CACHE/${fid}".reason.* "$CACHE/${fid}".prefix.* "$CACHE/${fid}".suffix.*
@@ -176,6 +201,7 @@ fi
 # ── PreToolUse Read: filter in-place ──────────────────────────────────────────
 if [ "$TOOL_NAME" = "Read" ]; then
   [ -f "$FILE_PATH" ] || exit 0
+  path_in_project "$FILE_PATH" || exit 0
   case "$(basename "$FILE_PATH")" in simplify-ignore*|SIMPLIFY-IGNORE*) exit 0 ;; esac
 
   mkdir -p "$CACHE"
@@ -217,6 +243,7 @@ fi
 
 # ── PostToolUse Edit|Write: expand, then re-filter ────────────────────────────
 if [ "$TOOL_NAME" = "Edit" ] || [ "$TOOL_NAME" = "Write" ]; then
+  path_in_project "$FILE_PATH" || exit 0
   ID=$(file_id "$FILE_PATH")
   [ -f "$CACHE/${ID}.bak" ] || exit 0
   ls "$CACHE/${ID}".block.* >/dev/null 2>&1 || exit 0

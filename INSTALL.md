@@ -2,7 +2,7 @@
 
 Install **ai-dev-guardrails** as Agent Skills in Cursor, Claude Code, Codex, Gemini CLI, Copilot, OpenCode, Windsurf, and any tool that supports `SKILL.md`.
 
-**Version:** 2.3.1  
+**Version:** 2.6.0  
 **Repo:** https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails
 
 ---
@@ -12,7 +12,7 @@ Install **ai-dev-guardrails** as Agent Skills in Cursor, Claude Code, Codex, Gem
 Uses the open [skills CLI](https://github.com/vercel-labs/skills) — detects your agent and installs into the correct directory:
 
 ```bash
-# All 25 skills
+# All skills (lifecycle + design)
 npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails
 
 # List skills without installing
@@ -25,7 +25,31 @@ npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill ai-dev-guardrails
 npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill using-agent-skills
 npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill test-driven-development
 npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill code-review-and-quality
+
+# Design pack (60+ approaches + safety)
+npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill using-design-skills
+npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill safe-file-ops
+npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill anti-slop-frontend
+npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill push-report
+npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill project-functionality-scan
 ```
+
+**Functionality scan:** `/scan` or `bash skills/project-functionality-scan/scripts/run-scan.sh` → `SCAN-REPORT.md` + `SCAN-REPORT.svg`.
+
+**Command decks:** [`skills/COMMANDS.md`](skills/COMMANDS.md) · [`design/COMMANDS.md`](design/COMMANDS.md) · [`commands/COMMANDS.md`](commands/COMMANDS.md).
+
+**Safety:** never `rsync --delete` into a project root. Sync skills only into `.cursor/skills/` (or your agent’s skills dir). See [`design/SAFETY.md`](design/SAFETY.md).
+
+**Gitignore installed skills (mandatory in the consuming app):**
+
+```bash
+# from the app repo root — after npx skills add / rsync
+bash /path/to/ai-dev-guardrails/scripts/ensure-skills-gitignore.sh .
+```
+
+This appends ignores for `.cursor/skills/`, `.claude/skills/`, `.agents/skills/`, other agent skill dirs, and `skills-lock.json`. Do **not** commit vendor skill copies into your product repo.
+
+**Push log:** before each push, run `push-report` to append security/quality details to root `REPORT.md`.
 
 Useful flags:
 
@@ -52,7 +76,8 @@ Copy (or keep) these at the **root of the consuming app**:
 | [`SRS.md`](SRS.md) | Project description + living task board |
 | [`Rules.md`](Rules.md) | Standards in one file (or use YAML packs below) |
 
-Optional YAML packs: `client_side/`, `server_side/`, `security/`, `devops/`.
+Optional YAML packs: `client/`, `server/`, `security/`, `devops/`.  
+Design pack (canonical): [`design/`](design/README.md) — also installable via the skill names above.
 
 ---
 
@@ -65,12 +90,14 @@ git clone https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails.git
 cd your-app
 mkdir -p .cursor/skills
 rsync -a ../ai-dev-guardrails/skills/ .cursor/skills/
+# NEVER: rsync --delete … ./   NEVER sync onto the project root
 ```
 
 Or from the pack itself:
 
 ```bash
 mkdir -p .cursor/skills && rsync -a skills/ .cursor/skills/
+bash scripts/ensure-skills-gitignore.sh .
 ```
 
 Details: [`docs/cursor-setup.md`](docs/cursor-setup.md)

@@ -5,6 +5,15 @@ description: Drives development with tests. Use when implementing any logic, fix
 
 # Test-Driven Development
 
+
+## ⚡ Command
+
+```text
+/test-driven-development
+# or ask the agent:
+use skill test-driven-development
+```
+
 ## Overview
 
 Write a failing test before writing the code that makes it pass. For bug fixes, reproduce the bug with a test before attempting a fix. Tests are proof — "seems right" is not done. A codebase with good tests is an AI agent's superpower; a codebase without tests is a liability.

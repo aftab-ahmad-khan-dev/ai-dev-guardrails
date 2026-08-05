@@ -5,6 +5,15 @@ description: Simplifies code for clarity. Use when refactoring code for clarity 
 
 # Code Simplification
 
+
+## ⚡ Command
+
+```text
+/code-simplification
+# or ask the agent:
+use skill code-simplification
+```
+
 > Inspired by the [Claude Code Simplifier plugin](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-simplifier/agents/code-simplifier.md). Adapted here as a model-agnostic, process-driven skill for any AI coding agent.
 
 ## Overview

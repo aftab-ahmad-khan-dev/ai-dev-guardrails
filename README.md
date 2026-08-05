@@ -1,10 +1,12 @@
 # Ai-dev-guardrails — AI Development Rules & Skills
 
+![Ai-dev-guardrails — Rules + skills for every AI coding agent](banner.jpg)
+
 Reusable **rules** and **skills** for **Cursor**, **Claude**, **Copilot**, **Codex**, **Gemini**, and any AI coding assistant.  
 Keep code clean, modular, secure, and consistent — without forcing rules that do not apply to your project.
 
 **Repository:** https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails  
-**Version:** 2.3.1
+**Version:** 2.6.0
 
 ---
 
@@ -16,7 +18,7 @@ This repo is an **installable Agent Skills pack**. One command wires lifecycle s
 # Universal — Cursor, Claude Code, Codex, Gemini, OpenCode, …
 npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails
 
-# Browse the 25 skills first
+# Browse skills first (lifecycle + design)
 npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --list
 
 # Meta skill only (SRS + Rules + lifecycle entrypoint)
@@ -43,7 +45,10 @@ Full per-tool guides: [`INSTALL.md`](INSTALL.md) · [`docs/getting-started.md`](
 
 ```bash
 mkdir -p .cursor/skills && rsync -a skills/ .cursor/skills/
+bash scripts/ensure-skills-gitignore.sh .   # ignore installed copies in the app repo
 ```
+
+**Consuming apps:** installed skill dirs (`.cursor/skills/`, `.agents/skills/`, `skills-lock.json`, …) must stay **gitignored**. Reinstall with `npx skills add` — do not vendor-commit them.
 
 ---
 
@@ -56,8 +61,9 @@ mkdir -p .cursor/skills && rsync -a skills/ .cursor/skills/
 | **Project description & tasks** | [`SRS.md`](SRS.md) — living requirements + version/date task board |
 | **Everything in one file** | [`Rules.md`](Rules.md) — SRS + LIFECYCLE skills + CS/SS/SEC/OPS + scans |
 | **Lifecycle skills** | [`skills/`](skills/README.md) — Define → Plan → Build → Verify → Review → Ship |
+| **Design skills** | [`design/`](design/README.md) — Anti-slop, steer vocabulary, motion craft |
 | **Personas / checklists / commands** | [`agents/`](agents/README.md) · [`references/`](references/README.md) · [`commands/`](commands/README.md) |
-| **Category YAML packs** | `client_side/`, `server_side/`, `security/`, `devops/` |
+| **Category YAML packs** | `client/`, `server/`, `security/`, `devops/` |
 | **Deploy workflow starters** | [`devops/pipelines/`](devops/pipelines/) |
 | **Agent entrypoint** | [`AGENTS.md`](AGENTS.md) |
 
@@ -89,7 +95,8 @@ This pack is rules AND skills (installable via npx skills).
 | **Server-side** (SS-*) | ⚙️ Context | Backend, API, or serverless routes exist |
 | **DevOps** (OPS-*) | ⚙️ Context | CI/CD, Docker, or a deploy target exists |
 | **Platform playbooks** (OPS-03–08) | ⚙️ One only | Match your host (Vercel, EC2, Railway, …) |
-| **Lifecycle skills** (`skills/`) | ✅ Usually | Match the current phase (don’t load all 25 at once) |
+| **Lifecycle skills** (`skills/`) | ✅ Usually | Match the current phase (don’t load all at once) |
+| **Design skills** (`design/`) | ⚙️ Context | Any user-facing UI that must avoid AI slop / needs motion craft |
 
 ### Examples
 
@@ -114,14 +121,15 @@ ai-dev-guardrails/
 ├── AGENTS.md                # ← Agent entrypoint (SRS + rules + skills)
 ├── README.md                # ← This file (install + how to apply + report template)
 ├── plugin.json              # ← Pack manifest (name / version)
-├── skills/                  # ← 25 installable skills (SKILL.md) + banner
+├── skills/                  # ← Installable skills (lifecycle + design mirrors) + banner
+├── design/                  # ← Design skill pack (anti-slop, steer, motion) + refs
 ├── agents/                  # ← Specialist personas (reviewer, security, …)
-├── references/              # ← Checklists (DoD, security, a11y, perf, …)
+├── references/              # ← Checklists (DoD, security, a11y, perf, design, …)
 ├── commands/                # ← Slash-command stubs (+ commands/claude/)
 ├── hooks/                   # ← Session lifecycle hooks
 ├── docs/                    # ← Per-tool setup (Cursor, Claude, Copilot, …)
-├── client_side/             # CS-01…CS-20 (YAML) + banner
-├── server_side/             # SS-01…SS-20 (YAML) + banner
+├── client/                  # CS-01…CS-20 (YAML) + banner
+├── server/                  # SS-01…SS-20 (YAML) + banner
 ├── security/                # SEC-01…SEC-20 (YAML) + banner
 └── devops/                  # OPS-01…OPS-20 (YAML) + pipelines/ + banners
 ```
@@ -137,7 +145,7 @@ Prefer **`npx skills add`** so skills land in the correct agent directory; or sy
 | | **Rules** | **SRS skills** | **Lifecycle skills** |
 |---|-----------|----------------|----------------------|
 | **What** | Quality / security / delivery standards (CS-*, SS-*, SEC-*, OPS-*) | How the AI runs the task board | Engineering workflows (spec, TDD, review, ship) |
-| **Where** | `Rules.md` §§1–6 + YAML packs | `Rules.md` §0 (SRS-01, SRS-02) | `skills/*/SKILL.md` (25) · Rules §0 LIFECYCLE-* |
+| **Where** | `Rules.md` §§1–6 + YAML packs | `Rules.md` §0 (SRS-01, SRS-02) | `skills/*/SKILL.md` · `design/` · Rules §0 LIFECYCLE-* |
 | **Install** | Paste / copy YAML | Included in meta skill | `npx skills add …` |
 | **Example** | “No file over 400 LOC” | “Read `SRS.md`, finish `T-003`, mark `done`” | “Red-green-refactor before merge” |
 
@@ -151,7 +159,8 @@ Prefer **`npx skills add`** so skills land in the correct agent directory; or sy
 | Define | `/spec` | `interview-me`, `idea-refine`, `spec-driven-development` |
 | Plan | `/plan` | `planning-and-task-breakdown` |
 | Build | `/build` | `incremental-implementation`, `test-driven-development`, `frontend-ui-engineering`, `api-and-interface-design`, `context-engineering`, `source-driven-development`, `doubt-driven-development` |
-| Verify | `/test` | `browser-testing-with-devtools`, `debugging-and-error-recovery` |
+| Design | — | `using-design-skills`, `anti-slop-frontend`, `style-*` / `steer-*` / motion approaches — see [`design/COMMANDS.md`](design/COMMANDS.md) |
+| Verify | `/test` `/scan` | `browser-testing-with-devtools`, `debugging-and-error-recovery`, `project-functionality-scan` |
 | Review | `/review` | `code-review-and-quality`, `code-simplification`, `security-and-hardening`, `performance-optimization` |
 | Ship | `/ship` | `git-workflow-and-versioning`, `ci-cd-and-automation`, `deprecation-and-migration`, `documentation-and-adrs`, `observability-and-instrumentation`, `shipping-and-launch` |
 
@@ -329,19 +338,23 @@ rules:
 |------|------|-------|-------|
 | SRS board | [SRS.md](SRS.md) | template | Project description + version/date tasks |
 | All | [Rules.md](Rules.md) | SRS + LIFECYCLE + 80 + naming + scans | Rules & skills in one file |
-| [skills](skills/README.md) | lifecycle | 25 | Spec → plan → build → verify → review → ship (+ meta) |
+| [skills](skills/README.md) | lifecycle + design | ~100 | Spec → ship + 60+ design approaches + push-report |
+| [design](design/README.md) | design | 70+ | Approaches, steer, styles, motion, safe-file-ops |
+| [REPORT.md](REPORT.md) | ops | — | Per-push security / quality log (`push-report` skill) |
+| [SCAN-REPORT.md](SCAN-REPORT.md) / [.svg](SCAN-REPORT.svg) | verify | — | Functionality scan (`/scan`) |
+| [skills/COMMANDS.md](skills/COMMANDS.md) | meta | — | Slash-command deck for all skills |
 | [agents](agents/README.md) | personas | 4 | Reviewer, test, security, webperf |
 | [references](references/README.md) | checklists | 7 | DoD, testing, security, a11y, perf, … |
 | [commands](commands/README.md) | slash cmds | 8 | `/spec` `/plan` `/build` `/test` `/review` `/ship` … |
 | [hooks](hooks/README.md) | session | scripts | Session-start / cache hooks |
 | [docs](docs/README.md) | guides | multi | Install on Cursor, Claude, Copilot, … |
-| [client_side](client_side/README.md) | `CS` | 20 | Modularity, UX, a11y, SEO, Tailwind |
-| [server_side](server_side/README.md) | `SS` | 20 | Layers, REST, auth, jobs, migrations |
+| [client](client/README.md) | `CS` | 20 | Modularity, UX, a11y, SEO, Tailwind |
+| [server](server/README.md) | `SS` | 20 | Layers, REST, auth, jobs, migrations |
 | [security](security/README.md) | `SEC` | 20 | Confidentiality, AI safety, injection |
 | [devops](devops/README.md) | `OPS` | 20 | CI/CD, platforms, pipelines |
 | [pipelines](devops/pipelines/README.md) | Actions | 6 starters | Platform deploy workflow templates |
 
-Each category folder README includes a thematic `banner.jpg` for GitHub browsing (rules packs + skills / agents / references / commands / hooks / docs).
+Each category folder README includes a thematic `banner.jpg` for GitHub browsing (root + `client` / `server` / `security` / `devops` + `skills` / `design` / `agents` / `references` / `commands` / `hooks` / `docs`).
 
 ---
 

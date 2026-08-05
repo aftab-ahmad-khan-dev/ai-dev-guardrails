@@ -5,6 +5,15 @@ description: Refines raw ideas into sharp, actionable concepts through structure
 
 # Idea Refine
 
+
+## ⚡ Command
+
+```text
+/idea-refine
+# or ask the agent:
+use skill idea-refine
+```
+
 Refines raw ideas into sharp, actionable concepts worth building through structured divergent and convergent thinking.
 
 ## How It Works

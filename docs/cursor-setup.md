@@ -171,7 +171,7 @@ Full tree: `skills/using-agent-skills/SKILL.md` in the repo.
 | Avoid | Do instead |
 |-------|------------|
 | Paste all skills into one rule | Sync to `.cursor/skills/` |
-| Maintain two diverging copies | `rsync` from upstream; commit `.cursor/skills/` |
+| Maintain two diverging copies | `rsync` from upstream; **gitignore** `.cursor/skills/` (reinstall via `npx skills add`) |
 | Many `alwaysApply: true` rules | One routing rule + focused globs rules |
 | Rely on `.cursorrules` only | Migrate to `.mdc` + skills |
 | Expect `agent-skills/agents/*.md` to auto-load | Paste in chat, or distill a short rule |
@@ -211,10 +211,10 @@ Files under `agent-skills/agents/` (e.g. code reviewer persona) are **not** load
 
 ## Checklist (new project)
 
-- [ ] `mkdir -p .cursor/skills` and sync from `agent-skills/skills/`
-- [ ] Optional: `.cursor/rules/agent-skills.mdc` with routing hint
+- [ ] `mkdir -p .cursor/skills` and sync / `npx skills add`
+- [ ] Run `scripts/ensure-skills-gitignore.sh .` so installed skills are **not** committed
+- [ ] Optional: `.cursor/rules/agent-skills.mdc` with routing hint (commit short rules only)
 - [ ] Add repo-specific rules as separate small `.mdc` files
-- [ ] Commit `.cursor/skills/` and `.cursor/rules/` (team shares behavior)
 - [ ] Skip giant `.cursorrules` unless required by legacy tooling
 
 ---

@@ -5,6 +5,15 @@ description: Breaks work into ordered tasks. Use when you have a spec or clear r
 
 # Planning and Task Breakdown
 
+
+## ⚡ Command
+
+```text
+/planning-and-task-breakdown
+# or ask the agent:
+use skill planning-and-task-breakdown
+```
+
 ## Overview
 
 Decompose work into small, verifiable tasks with explicit acceptance criteria. Good task breakdown is the difference between an agent that completes work reliably and one that produces a tangled mess. Every task should be small enough to implement, test, and verify in a single focused session.

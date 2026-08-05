@@ -1,5 +1,5 @@
 {
   "name": "ai-dev-guardrails",
-  "version": "2.3.1",
-  "description": "Rules + lifecycle skills for any AI coding agent. SRS task board, Rules.md standards, and installable SKILL.md workflows."
+  "version": "2.6.0",
+  "description": "Rules + lifecycle + 60+ design approaches + project functionality scan. Slash command decks, REPORT.md, SCAN-REPORT.svg."
 }

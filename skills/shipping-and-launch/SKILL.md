@@ -5,6 +5,15 @@ description: Prepares production launches. Use when preparing to deploy to produ
 
 # Shipping and Launch
 
+
+## ⚡ Command
+
+```text
+/shipping-and-launch
+# or ask the agent:
+use skill shipping-and-launch
+```
+
 ## Overview
 
 Ship with confidence. The goal is not just to deploy — it's to deploy safely, with monitoring in place, a rollback plan ready, and a clear understanding of what success looks like. Every launch should be reversible, observable, and incremental.
@@ -295,6 +304,7 @@ Every deployment needs a rollback plan before it happens:
 Before deploying:
 
 - [ ] Pre-launch checklist completed (all sections green)
+- [ ] `push-report` run — `REPORT.md` updated with security/quality verdict (**PUSH OK**, not BLOCKED)
 - [ ] Feature flag configured (if applicable)
 - [ ] Rollback plan documented
 - [ ] Monitoring dashboards set up

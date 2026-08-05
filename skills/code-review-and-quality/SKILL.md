@@ -5,6 +5,15 @@ description: Conducts multi-axis code review. Use before merging any change. Use
 
 # Code Review and Quality
 
+
+## ⚡ Command
+
+```text
+/code-review-and-quality
+# or ask the agent:
+use skill code-review-and-quality
+```
+
 ## Overview
 
 Multi-dimensional code review with quality gates. Every change gets reviewed before merge — no exceptions. Review covers five axes: correctness, readability, architecture, security, and performance.

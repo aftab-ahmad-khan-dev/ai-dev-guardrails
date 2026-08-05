@@ -1,12 +1,13 @@
 # Rules.md — AI Development Rules & Skills (All-in-One)
 
-> **Version:** 2.3.1 · **Updated:** 2026-07-23  
+> **Version:** 2.6.0 · **Updated:** 2026-08-05  
 > **Repository:** https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails
 > 
 > Single-file **rules + skills** reference for Cursor, Claude, Copilot, Codex, Gemini, and any agent.
 > **Install this pack:** `npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails` — see [README.md](README.md).
 > **Project detail & tasks live in [`SRS.md`](SRS.md)** — read it first; update status after each done task.
-> **Lifecycle skills** (25 × `SKILL.md`): [`skills/`](skills/) — entrypoint [`ai-dev-guardrails`](skills/ai-dev-guardrails/SKILL.md).
+> **Lifecycle skills:** [`skills/`](skills/) — entrypoint [`ai-dev-guardrails`](skills/ai-dev-guardrails/SKILL.md).
+> **Design skills:** [`design/`](design/README.md) (mirrored into `skills/` for install).
 > For **applicability matrix**, **lifecycle map**, and **compliance report**, see [README.md](README.md).
 
 ## Table of Contents
@@ -28,8 +29,10 @@ This pack is both **rules** (what good code must satisfy) and **skills** (how th
 |------|------|
 | **Rules** | CS-*, SS-*, naming, SEC-*, OPS-*, scans — quality, security, and delivery standards |
 | **SRS skills** | Board workflow: read SRS → pick task → implement under rules → mark complete → report |
-| **Lifecycle skills** | Engineering workflows in [`skills/`](skills/) (25): `/spec` → `/plan` → `/build` → `/test` → `/review` → `/ship` |
-| **Meta skill** | [`ai-dev-guardrails`](skills/ai-dev-guardrails/SKILL.md) — entrypoint that wires SRS + Rules + lifecycle |
+| **Lifecycle skills** | Engineering workflows in [`skills/`](skills/): `/spec` → `/plan` → `/build` → `/test` → `/review` → `/ship` |
+| **Design skills** | 60+ approaches in [`design/`](design/README.md) — always `safe-file-ops`; router `using-design-skills` |
+| **Push report** | [`REPORT.md`](REPORT.md) via [`push-report`](skills/push-report/SKILL.md) before every push |
+| **Meta skill** | [`ai-dev-guardrails`](skills/ai-dev-guardrails/SKILL.md) — entrypoint that wires SRS + Rules + lifecycle + design |
 
 ### Install (any AI)
 
@@ -92,10 +95,12 @@ Keep `SRS.md` + this file (or YAML packs) at the project root. Guides: [`docs/ge
 - Unsure which skill applies → [`skills/using-agent-skills`](skills/using-agent-skills/SKILL.md).
 - New/underspecified work → `interview-me` / `idea-refine` / `spec-driven-development` before large coding.
 - Implementation → prefer `incremental-implementation` + `test-driven-development`.
-- UI → `frontend-ui-engineering`; API/boundaries → `api-and-interface-design`.
+- UI → `frontend-ui-engineering` plus design pack when taste/motion matters (`using-design-skills`).
+- AI-looking UI / polish / distill / redesign → [`design/`](design/README.md).
+- API/boundaries → `api-and-interface-design`.
 - Before merge → `code-review-and-quality` (and `security-and-hardening` when auth/input/data are involved).
 - Still enforce applicable CS/SS/SEC/OPS rules; lifecycle skills do not replace the compliance report.
-- Do **not** load all 25 skills into context at once — only the phase that matches the current task.
+- Do **not** load every skill into context at once — only the phase that matches the current task.
 
 **Lifecycle map (quick)**
 
@@ -105,11 +110,15 @@ Keep `SRS.md` + this file (or YAML packs) at the project root. Guides: [`docs/ge
 | Define | `interview-me`, `idea-refine`, `spec-driven-development` |
 | Plan | `planning-and-task-breakdown` |
 | Build | `incremental-implementation`, `test-driven-development`, `frontend-ui-engineering`, `api-and-interface-design`, `context-engineering`, `source-driven-development`, `doubt-driven-development` |
+| Design | `using-design-skills`, `safe-file-ops`, `anti-slop-frontend`, `style-*`, `steer-*`, `motion-*`, workflows in `design/approaches/` |
+| Ship gate | `push-report` → `REPORT.md` |
+| Functionality scan | `project-functionality-scan` (`/scan`) → `SCAN-REPORT.md` + `.svg` |
+| Command decks | [`skills/COMMANDS.md`](skills/COMMANDS.md) · [`design/COMMANDS.md`](design/COMMANDS.md) · [`commands/COMMANDS.md`](commands/COMMANDS.md) |
 | Verify | `browser-testing-with-devtools`, `debugging-and-error-recovery` |
 | Review | `code-review-and-quality`, `code-simplification`, `security-and-hardening`, `performance-optimization` |
 | Ship | `git-workflow-and-versioning`, `ci-cd-and-automation`, `deprecation-and-migration`, `documentation-and-adrs`, `observability-and-instrumentation`, `shipping-and-launch` |
 
-Supporting trees: [`agents/`](agents/) (personas), [`references/`](references/) (checklists), [`commands/`](commands/) (slash commands), [`hooks/`](hooks/), [`docs/`](docs/).
+Supporting trees: [`design/`](design/) (canonical design pack), [`agents/`](agents/) (personas), [`references/`](references/) (checklists), [`commands/`](commands/) (slash commands), [`hooks/`](hooks/), [`docs/`](docs/).
 
 **AI directive:** After reading `SRS.md`, select and follow the matching skill(s) under `skills/`, then apply Rules §§1–6 for the project type. Name the skills used in the compliance report.
 
