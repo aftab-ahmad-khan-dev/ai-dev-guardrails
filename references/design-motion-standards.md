@@ -1,6 +1,6 @@
 # Motion standards
 
-Use with [`motion-craft`](../motion-craft/SKILL.md) and [`review-motion`](../review-motion/SKILL.md).
+Use with [`motion-craft`](../design/motion-craft/SKILL.md) and [`review-motion`](../design/review-motion/SKILL.md).
 
 ## Frequency gate (decide first)
 

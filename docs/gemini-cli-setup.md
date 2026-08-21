@@ -41,9 +41,9 @@ For skills you want always loaded as persistent project context (rather than on-
 
 ```bash
 # Create GEMINI.md with core skills as persistent context
-cat /path/to/agent-skills/skills/incremental-implementation/SKILL.md > GEMINI.md
+cat /path/to/agent-skills/skills/build/incremental-implementation/SKILL.md > GEMINI.md
 echo -e "\n---\n" >> GEMINI.md
-cat /path/to/agent-skills/skills/code-review-and-quality/SKILL.md >> GEMINI.md
+cat /path/to/agent-skills/skills/review/code-review-and-quality/SKILL.md >> GEMINI.md
 ```
 
 You can also modularize by importing from separate files:
@@ -51,8 +51,8 @@ You can also modularize by importing from separate files:
 ```markdown
 # Project Instructions
 
-@skills/test-driven-development/SKILL.md
-@skills/incremental-implementation/SKILL.md
+@skills/build/test-driven-development/SKILL.md
+@skills/build/incremental-implementation/SKILL.md
 ```
 
 Use `/memory show` to verify loaded context, and `/memory reload` to refresh after changes.
@@ -100,7 +100,7 @@ To replicate the `agent-skills` experience from other tools, you can configure a
 You can explicitly load any skill into your current session by referencing it with the `@` symbol in your prompt:
 
 ```markdown
-Use the @skills/test-driven-development/SKILL.md skill to implement this fix.
+Use the @skills/build/test-driven-development/SKILL.md skill to implement this fix.
 ```
 
 This is useful when you want to ensure a specific workflow is followed without waiting for auto-discovery.

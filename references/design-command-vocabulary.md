@@ -1,6 +1,6 @@
 # Design steer — command vocabulary
 
-Use with [`design-steer`](../design-steer/SKILL.md). Each command is one intervention. Prefer naming the command explicitly in chat.
+Use with [`design-steer`](../design/design-steer/SKILL.md). Each command is one intervention. Prefer naming the command explicitly in chat.
 
 ## Setup & context
 
@@ -63,4 +63,4 @@ design-steer audit settings
 design-steer typeset onboarding
 ```
 
-Always load PRODUCT.md / DESIGN.md when present. Always run the [slop catalog](slop-catalog.md) before declaring done.
+Always load PRODUCT.md / DESIGN.md when present. Always run the [slop catalog](design-slop-catalog.md) before declaring done.

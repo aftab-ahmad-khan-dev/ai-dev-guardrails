@@ -30,7 +30,7 @@ rsync -a /path/to/ai-dev-guardrails/skills/ .cursor/skills/
 | Core skills | 11 | `anti-slop-frontend`, `design-steer`, `motion-craft`, `safe-file-ops`, … |
 | Approaches | 68 | [`approaches/`](approaches/README.md) — `style-*`, `steer-*`, `motion-*`, workflows |
 | References | 4 | [`references/`](references/) |
-| Push report | 1 | [`../skills/push-report`](../skills/push-report/SKILL.md) → `REPORT.md` |
+| Push report | 1 | [`../skills/push-report`](../skills/ship/push-report/SKILL.md) → `REPORT.md` |
 
 ## Start here
 

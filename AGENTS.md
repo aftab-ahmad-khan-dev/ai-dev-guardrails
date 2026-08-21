@@ -10,7 +10,7 @@ This repo combines three layers:
 | **Rules** | [`Rules.md`](Rules.md), `client/`, `server/`, `security/`, `devops/` | Quality, security, DevOps standards — apply only what fits the project |
 | **Lifecycle skills** | [`skills/`](skills/) | Production workflows (spec → ship) in this pack |
 | **Design skills** | [`design/`](design/) | 60+ approaches + safe-file-ops (mirrored into `skills/` for install) |
-| **Push report** | [`REPORT.md`](REPORT.md) · [`skills/push-report`](skills/push-report/SKILL.md) | Per-push security/quality log |
+| **Push report** | [`REPORT.md`](REPORT.md) · [`skills/push-report`](skills/ship/push-report/SKILL.md) | Per-push security/quality log |
 
 ## Mandatory loop
 
@@ -42,7 +42,7 @@ Personas: [`agents/`](agents/). Checklists: [`references/`](references/).
 npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails
 ```
 
-See [`docs/getting-started.md`](docs/getting-started.md) and [`AGENTS.md`](../AGENTS.md).
+See [`docs/getting-started.md`](docs/getting-started.md).
 
 ## Cursor
 

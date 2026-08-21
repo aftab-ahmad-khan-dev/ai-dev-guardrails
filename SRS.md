@@ -9,8 +9,8 @@
 |-------|--------|
 | **Project** | Ai-dev-guardrails |
 | **Repository** | https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails |
-| **Current version** | `2.6.0` |
-| **Last updated** | `2026-08-05` |
+| **Current version** | `2.7.0` |
+| **Last updated** | `2026-08-21` |
 | **Owner** | aftab-ahmad-khan-dev |
 
 ---
@@ -71,7 +71,8 @@
 | `2.4.0` | `2026-08-05` | Design skill pack (`design/`) — anti-slop, steer, motion | `done` |
 | `2.5.0` | `2026-08-05` | 60+ design approaches, safe-file-ops, push REPORT.md | `done` |
 | `2.6.0` | `2026-08-05` | Project functionality scan + skill commands catalogs | `done` |
-| `2.7.0` | `TBD` | Optional Cursor rule/skill export helpers | `todo` |
+| `2.7.0` | `2026-08-21` | Category folders for `npx skills add --list` + self-lint validator | `in_progress` |
+| `2.8.0` | `TBD` | Optional Cursor rule/skill export helpers | `todo` |
 
 ---
 
@@ -135,7 +136,14 @@
 | T-051 | Add Command section to every SKILL.md + folder COMMANDS.md catalogs | high | `done` | 2026-08-05 | inject script + 3 COMMANDS.md decks |
 | T-052 | Wire `/scan` command + README/AGENTS | medium | `done` | 2026-08-05 | scan.toml + claude/scan.md |
 
-### Version `2.7.0` · planned
+### Version `2.7.0` · started `2026-08-21`
+
+| ID | Task | Priority | Status | Completed | Notes |
+|----|------|----------|--------|-----------|-------|
+| T-060 | Regroup `skills/` into category folders (`meta/define/plan/build/design/verify/review/ship`) so `npx skills add --list` shows a categorized picker instead of a 106-item flat list | high | `done` | 2026-08-21 | git mv all 106 skills; fixed sync-to-skills.sh, inject-skill-commands.py glob depth, and every cross-reference (README/Rules/AGENTS/INSTALL/docs/agents/commands/hooks/references); verified zero broken relative links repo-wide |
+| T-061 | Node.js self-lint validator: YAML rule-pack schema (unique ids, required fields) + every SKILL.md frontmatter/category placement, emitting a REPORT-style summary | high | `done` | 2026-08-21 | scripts/validate.js + `npm run validate`; skill `self-validate`; VALIDATION-REPORT.md |
+
+### Version `2.8.0` · planned
 
 | ID | Task | Priority | Status | Completed | Notes |
 |----|------|----------|--------|-----------|-------|
@@ -172,6 +180,7 @@
 
 | Date | Version | Change |
 |------|---------|--------|
+| `2026-08-21` | `2.7.0` | Skills regrouped into 8 category folders for `npx skills add --list`; 3 pre-existing broken reference links fixed along the way |
 | `2026-08-05` | `2.6.0` | project-functionality-scan; SCAN-REPORT.svg; skill Command decks |
 | `2026-08-05` | `2.5.0` | 68 design approaches; safe-file-ops; push-report → REPORT.md |
 | `2026-08-05` | `2.4.0` | Design skill pack (`design/`) — anti-slop frontend, steer vocabulary, motion craft |

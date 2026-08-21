@@ -158,7 +158,7 @@ def classify(name: str) -> str:
         "context-engineering", "source-driven-development", "doubt-driven-development",
     ):
         return "build"
-    if name in ("browser-testing-with-devtools", "debugging-and-error-recovery", "project-functionality-scan"):
+    if name in ("browser-testing-with-devtools", "debugging-and-error-recovery", "project-functionality-scan", "self-validate"):
         return "verify"
     if name in (
         "code-review-and-quality", "code-simplification",
@@ -234,7 +234,7 @@ def write_catalog(path: Path, title: str, subtitle: str, rows: list[tuple[str, s
 def main() -> None:
     updated = 0
     # All skills under skills/ and design/
-    skill_files = list(REPO.glob("skills/*/SKILL.md")) + list(REPO.glob("design/*/SKILL.md")) + list(REPO.glob("design/approaches/*/SKILL.md"))
+    skill_files = list(REPO.glob("skills/**/SKILL.md")) + list(REPO.glob("design/*/SKILL.md")) + list(REPO.glob("design/approaches/*/SKILL.md"))
     for p in skill_files:
         if ensure_command(p):
             updated += 1

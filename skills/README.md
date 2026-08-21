@@ -20,6 +20,13 @@ npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill ai-dev-guardrails
 | **Rules** | [`../Rules.md`](../Rules.md) — quality / security standards |
 | **Skills** | this folder — how to build |
 
+## Layout
+
+Skills live under one category folder each — `skills/<category>/<name>/SKILL.md` — so `npx skills add --list`
+groups the pack by category at install time instead of showing 106 skills as one flat list. Categories:
+`meta`, `define`, `plan`, `build`, `design`, `verify`, `review`, `ship` (matches the phase table below;
+`design` holds all 79 design-pack skills regardless of sub-style).
+
 ## Index
 
 | Phase | Skills |
@@ -33,8 +40,8 @@ npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill ai-dev-guardrails
 | Review | `code-review-and-quality`, `code-simplification`, `security-and-hardening`, `performance-optimization` |
 | Ship | `git-workflow-and-versioning`, `push-report`, `ci-cd-and-automation`, `deprecation-and-migration`, `documentation-and-adrs`, `observability-and-instrumentation`, `shipping-and-launch` |
 
-Start with [`ai-dev-guardrails`](ai-dev-guardrails/SKILL.md) or [`using-agent-skills`](using-agent-skills/SKILL.md).
+Start with [`ai-dev-guardrails`](meta/ai-dev-guardrails/SKILL.md) or [`using-agent-skills`](meta/using-agent-skills/SKILL.md).
 
-**Design pack:** canonical source is [`../design/`](../design/README.md) (~70 approaches). Mirrored here for `npx skills add`. **Safety:** [`../design/SAFETY.md`](../design/SAFETY.md). **Push log:** [`push-report`](push-report/SKILL.md) → root `REPORT.md`.
+**Design pack:** canonical source is [`../design/`](../design/README.md) (~70 approaches). Mirrored here for `npx skills add`. **Safety:** [`../design/SAFETY.md`](../design/SAFETY.md). **Push log:** [`push-report`](ship/push-report/SKILL.md) → root `REPORT.md`.
 
 See also: [`docs/getting-started.md`](../docs/getting-started.md) · [`docs/cursor-setup.md`](../docs/cursor-setup.md)

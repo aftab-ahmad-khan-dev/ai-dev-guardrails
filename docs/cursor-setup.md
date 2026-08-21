@@ -162,7 +162,7 @@ Explicit user phrases (“follow TDD”, “use code-review-and-quality”) stil
 | Security / performance | `security-and-hardening`, `performance-optimization` |
 | Git / CI / ship | `git-workflow-and-versioning`, `ci-cd-and-automation`, `shipping-and-launch` |
 
-Full tree: `skills/using-agent-skills/SKILL.md` in the repo.
+Full tree: `skills/meta/using-agent-skills/SKILL.md` in the repo.
 
 ---
 

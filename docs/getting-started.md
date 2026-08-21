@@ -36,14 +36,14 @@ SRS.md (what)  +  Rules.md (standards)  +  skills/* (how)
 3. Agent enforces applicable **rules** only.  
 4. Agent marks the task **done** in `SRS.md` and reports compliance.
 
-Entrypoint skill: [`ai-dev-guardrails`](../skills/ai-dev-guardrails/SKILL.md).
+Entrypoint skill: [`ai-dev-guardrails`](../skills/meta/ai-dev-guardrails/SKILL.md).
 
 ## Manual install (any agent)
 
 ### Option A — Paste
 
 1. Clone or download this repo.  
-2. Paste [`skills/ai-dev-guardrails/SKILL.md`](../skills/ai-dev-guardrails/SKILL.md) into the agent system prompt or rules.  
+2. Paste [`skills/meta/ai-dev-guardrails/SKILL.md`](../skills/meta/ai-dev-guardrails/SKILL.md) into the agent system prompt or rules.  
 3. Add `SRS.md` + `Rules.md` to the project.  
 4. Load other `skills/<name>/SKILL.md` files as needed for the task.
 

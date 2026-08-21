@@ -9,5 +9,11 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails.git"
+  },
+  "scripts": {
+    "validate": "node scripts/validate.js"
+  },
+  "devDependencies": {
+    "js-yaml": "^5.3.0"
   }
 }

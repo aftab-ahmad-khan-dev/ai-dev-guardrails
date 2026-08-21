@@ -6,7 +6,7 @@ Reusable **rules** and **skills** for **Cursor**, **Claude**, **Copilot**, **Cod
 Keep code clean, modular, secure, and consistent — without forcing rules that do not apply to your project.
 
 **Repository:** https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails  
-**Version:** 2.6.0  
+**Version:** 2.7.0  
 **By Aftab Ahmad Khan**
 
 ---
@@ -19,7 +19,7 @@ This repo is an **installable Agent Skills pack**. One command wires lifecycle s
 # Universal — Cursor, Claude Code, Codex, Gemini, OpenCode, …
 npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails
 
-# Browse skills first (lifecycle + design)
+# Browse skills first — grouped by category (meta/define/plan/build/design/verify/review/ship)
 npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --list
 
 # Meta skill only (SRS + Rules + lifecycle entrypoint)
@@ -40,7 +40,7 @@ After install, keep these at the **project root**:
 
 Full per-tool guides: [`INSTALL.md`](INSTALL.md) · [`docs/getting-started.md`](docs/getting-started.md) · [`docs/`](docs/README.md)
 
-**Manual / paste:** load [`skills/ai-dev-guardrails/SKILL.md`](skills/ai-dev-guardrails/SKILL.md) into the system prompt, then add other `skills/*/SKILL.md` as needed.
+**Manual / paste:** load [`skills/meta/ai-dev-guardrails/SKILL.md`](skills/meta/ai-dev-guardrails/SKILL.md) into the system prompt, then add other `skills/*/SKILL.md` as needed.
 
 **Cursor (local sync from clone):**
 
@@ -58,7 +58,7 @@ bash scripts/ensure-skills-gitignore.sh .   # ignore installed copies in the app
 | Goal | Use this |
 |------|----------|
 | **Install skills** | [`INSTALL.md`](INSTALL.md) · `npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails` |
-| **Meta skill** | [`skills/ai-dev-guardrails`](skills/ai-dev-guardrails/SKILL.md) |
+| **Meta skill** | [`skills/ai-dev-guardrails`](skills/meta/ai-dev-guardrails/SKILL.md) |
 | **Project description & tasks** | [`SRS.md`](SRS.md) — living requirements + version/date task board |
 | **Everything in one file** | [`Rules.md`](Rules.md) — SRS + LIFECYCLE skills + CS/SS/SEC/OPS + scans |
 | **Lifecycle skills** | [`skills/`](skills/README.md) — Define → Plan → Build → Verify → Review → Ship |
@@ -66,7 +66,8 @@ bash scripts/ensure-skills-gitignore.sh .   # ignore installed copies in the app
 | **Personas / checklists / commands** | [`agents/`](agents/README.md) · [`references/`](references/README.md) · [`commands/`](commands/README.md) |
 | **Category YAML packs** | `client/`, `server/`, `security/`, `devops/` |
 | **Deploy workflow starters** | [`devops/pipelines/`](devops/pipelines/) |
-| **Agent entrypoint** | [`AGENTS.md`](AGENTS.md) |
+| **Agent entrypoint** | [`AGENTS.md`](AGENTS.md) — Claude Code: [`CLAUDE.md`](CLAUDE.md) · Cursor: [`CURSOR.md`](CURSOR.md) |
+| **Self-lint this pack** | `npm run validate` → [`VALIDATION-REPORT.md`](VALIDATION-REPORT.md) — YAML schema + skill frontmatter/category checks |
 
 **Paste into your AI system prompt:**
 
@@ -120,13 +121,19 @@ ai-dev-guardrails/
 ├── SRS.md                   # ← Project description + version/date task board (template)
 ├── Rules.md                 # ← Rules + SRS/LIFECYCLE skills + all standards in one file
 ├── AGENTS.md                # ← Agent entrypoint (SRS + rules + skills)
+├── CLAUDE.md / CURSOR.md    # ← Maintainer feature trackers for this repo (not a reusable asset)
 ├── README.md                # ← This file (install + how to apply + report template)
 ├── plugin.json              # ← Pack manifest (name / version)
-├── skills/                  # ← Installable skills (lifecycle + design mirrors) + banner
+├── package.json             # ← `npm run validate` (self-lint) + devDependencies
+├── VALIDATION-REPORT.md     # ← Latest self-lint run (YAML schema + skill checks)
+├── skills/                  # ← Installable skills, grouped by category for `npx skills add --list`
+│   ├── meta/ define/ plan/ build/ verify/ review/ ship/   # 28 lifecycle skills
+│   └── design/                                            # 79 design skills (11 core + 68 approaches)
 ├── design/                  # ← Design skill pack (anti-slop, steer, motion) + refs
 ├── agents/                  # ← Specialist personas (reviewer, security, …)
 ├── references/              # ← Checklists (DoD, security, a11y, perf, design, …)
 ├── commands/                # ← Slash-command stubs (+ commands/claude/)
+├── scripts/                 # ← validate.js (self-lint), inject-skill-commands.py, gitignore helper
 ├── hooks/                   # ← Session lifecycle hooks
 ├── docs/                    # ← Per-tool setup (Cursor, Claude, Copilot, …)
 ├── client/                  # CS-01…CS-20 (YAML) + banner
@@ -161,7 +168,7 @@ Prefer **`npx skills add`** so skills land in the correct agent directory; or sy
 | Plan | `/plan` | `planning-and-task-breakdown` |
 | Build | `/build` | `incremental-implementation`, `test-driven-development`, `frontend-ui-engineering`, `api-and-interface-design`, `context-engineering`, `source-driven-development`, `doubt-driven-development` |
 | Design | — | `using-design-skills`, `anti-slop-frontend`, `style-*` / `steer-*` / motion approaches — see [`design/COMMANDS.md`](design/COMMANDS.md) |
-| Verify | `/test` `/scan` | `browser-testing-with-devtools`, `debugging-and-error-recovery`, `project-functionality-scan` |
+| Verify | `/test` `/scan` `/validate` | `browser-testing-with-devtools`, `debugging-and-error-recovery`, `project-functionality-scan`, `self-validate` |
 | Review | `/review` | `code-review-and-quality`, `code-simplification`, `security-and-hardening`, `performance-optimization` |
 | Ship | `/ship` | `git-workflow-and-versioning`, `ci-cd-and-automation`, `deprecation-and-migration`, `documentation-and-adrs`, `observability-and-instrumentation`, `shipping-and-launch` |
 
@@ -339,10 +346,11 @@ rules:
 |------|------|-------|-------|
 | SRS board | [SRS.md](SRS.md) | template | Project description + version/date tasks |
 | All | [Rules.md](Rules.md) | SRS + LIFECYCLE + 80 + naming + scans | Rules & skills in one file |
-| [skills](skills/README.md) | lifecycle + design | ~100 | Spec → ship + 60+ design approaches + push-report |
-| [design](design/README.md) | design | 70+ | Approaches, steer, styles, motion, safe-file-ops |
+| [skills](skills/README.md) | lifecycle + design | 107 | Spec → ship (28, incl. self-validate) + 79 design approaches |
+| [design](design/README.md) | design | 79 | Approaches, steer, styles, motion, safe-file-ops |
 | [REPORT.md](REPORT.md) | ops | — | Per-push security / quality log (`push-report` skill) |
 | [SCAN-REPORT.md](SCAN-REPORT.md) / [.svg](SCAN-REPORT.svg) | verify | — | Functionality scan (`/scan`) |
+| [VALIDATION-REPORT.md](VALIDATION-REPORT.md) | verify | — | Pack self-lint (`npm run validate` / `/validate`) |
 | [skills/COMMANDS.md](skills/COMMANDS.md) | meta | — | Slash-command deck for all skills |
 | [agents](agents/README.md) | personas | 4 | Reviewer, test, security, webperf |
 | [references](references/README.md) | checklists | 7 | DoD, testing, security, a11y, perf, … |
@@ -374,6 +382,8 @@ Portions of the lifecycle skill pack were adapted from [addyosmani/agent-skills]
 
 ## Contributing
 
+- Run `npm run validate` after adding/moving a skill or editing a YAML rule pack; fix any `FAIL` before pushing.
+- New skills go under `skills/<category>/<name>/SKILL.md` — category is one of `meta/define/plan/build/design/verify/review/ship`.
 - Update install docs when the public GitHub skills path or `npx skills` flags change.
 - Keep `Rules.md` in sync when YAML packs change.
 - Keep `SRS.md` current when this pack’s own roadmap/tasks change.

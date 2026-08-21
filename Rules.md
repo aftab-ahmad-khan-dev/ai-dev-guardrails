@@ -6,7 +6,7 @@
 > Single-file **rules + skills** reference for Cursor, Claude, Copilot, Codex, Gemini, and any agent.
 > **Install this pack:** `npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails` — see [README.md](README.md).
 > **Project detail & tasks live in [`SRS.md`](SRS.md)** — read it first; update status after each done task.
-> **Lifecycle skills:** [`skills/`](skills/) — entrypoint [`ai-dev-guardrails`](skills/ai-dev-guardrails/SKILL.md).
+> **Lifecycle skills:** [`skills/`](skills/) — entrypoint [`ai-dev-guardrails`](skills/meta/ai-dev-guardrails/SKILL.md).
 > **Design skills:** [`design/`](design/README.md) (mirrored into `skills/` for install).
 > For **applicability matrix**, **lifecycle map**, and **compliance report**, see [README.md](README.md).
 
@@ -31,8 +31,8 @@ This pack is both **rules** (what good code must satisfy) and **skills** (how th
 | **SRS skills** | Board workflow: read SRS → pick task → implement under rules → mark complete → report |
 | **Lifecycle skills** | Engineering workflows in [`skills/`](skills/): `/spec` → `/plan` → `/build` → `/test` → `/review` → `/ship` |
 | **Design skills** | 60+ approaches in [`design/`](design/README.md) — always `safe-file-ops`; router `using-design-skills` |
-| **Push report** | [`REPORT.md`](REPORT.md) via [`push-report`](skills/push-report/SKILL.md) before every push |
-| **Meta skill** | [`ai-dev-guardrails`](skills/ai-dev-guardrails/SKILL.md) — entrypoint that wires SRS + Rules + lifecycle + design |
+| **Push report** | [`REPORT.md`](REPORT.md) via [`push-report`](skills/ship/push-report/SKILL.md) before every push |
+| **Meta skill** | [`ai-dev-guardrails`](skills/meta/ai-dev-guardrails/SKILL.md) — entrypoint that wires SRS + Rules + lifecycle + design |
 
 ### Install (any AI)
 
@@ -91,8 +91,8 @@ Keep `SRS.md` + this file (or YAML packs) at the project root. Guides: [`docs/ge
 **Summary:** When work matches a lifecycle skill (spec, plan, TDD, review, security, ship, …), follow that skill’s process in [`skills/<name>/SKILL.md`](skills/). Do not invent a weaker ad-hoc process.
 
 **Rules**
-- Pack entrypoint → [`skills/ai-dev-guardrails`](skills/ai-dev-guardrails/SKILL.md).
-- Unsure which skill applies → [`skills/using-agent-skills`](skills/using-agent-skills/SKILL.md).
+- Pack entrypoint → [`skills/ai-dev-guardrails`](skills/meta/ai-dev-guardrails/SKILL.md).
+- Unsure which skill applies → [`skills/using-agent-skills`](skills/meta/using-agent-skills/SKILL.md).
 - New/underspecified work → `interview-me` / `idea-refine` / `spec-driven-development` before large coding.
 - Implementation → prefer `incremental-implementation` + `test-driven-development`.
 - UI → `frontend-ui-engineering` plus design pack when taste/motion matters (`using-design-skills`).

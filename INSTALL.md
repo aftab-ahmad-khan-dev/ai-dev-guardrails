@@ -35,7 +35,7 @@ npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill push-report
 npx skills add aftab-ahmad-khan-dev/ai-dev-guardrails --skill project-functionality-scan
 ```
 
-**Functionality scan:** `/scan` or `bash skills/project-functionality-scan/scripts/run-scan.sh` → `SCAN-REPORT.md` + `SCAN-REPORT.svg`.
+**Functionality scan:** `/scan` or `bash skills/verify/project-functionality-scan/scripts/run-scan.sh` → `SCAN-REPORT.md` + `SCAN-REPORT.svg`.
 
 **Command decks:** [`skills/COMMANDS.md`](skills/COMMANDS.md) · [`design/COMMANDS.md`](design/COMMANDS.md) · [`commands/COMMANDS.md`](commands/COMMANDS.md).
 
@@ -107,7 +107,7 @@ Details: [`docs/cursor-setup.md`](docs/cursor-setup.md)
 
 ## 4. Manual paste (any AI)
 
-1. Open [`skills/ai-dev-guardrails/SKILL.md`](skills/ai-dev-guardrails/SKILL.md).
+1. Open [`skills/meta/ai-dev-guardrails/SKILL.md`](skills/meta/ai-dev-guardrails/SKILL.md).
 2. Paste into the agent system prompt / custom instructions.
 3. Add `SRS.md` + `Rules.md` to the project.
 4. Load other `skills/<name>/SKILL.md` files when the phase matches (spec, TDD, review, ship).

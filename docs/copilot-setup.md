@@ -10,8 +10,8 @@ Copilot supports creating agent skills using a `.github/skills`, `.claude/skills
 mkdir -p .github/skills/test-driven-development .github/skills/code-review-and-quality
 
 # Create files for essential skills
-cat /path/to/agent-skills/skills/test-driven-development/SKILL.md > .github/skills/test-driven-development/SKILL.md
-cat /path/to/agent-skills/skills/code-review-and-quality/SKILL.md > .github/skills/code-review-and-quality/SKILL.md
+cat /path/to/agent-skills/skills/build/test-driven-development/SKILL.md > .github/skills/test-driven-development/SKILL.md
+cat /path/to/agent-skills/skills/review/code-review-and-quality/SKILL.md > .github/skills/code-review-and-quality/SKILL.md
 ```
 
 For more details, refer [Creating agent skills for GitHub Copilot](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-skills).

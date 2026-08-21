@@ -65,7 +65,7 @@ node scripts/run-evals.js
 node scripts/run-evals.js --behavioral <skill-name> --dry-run
 
 # Hook regression test, required if you touch hooks/session-start.sh
-# or skills/using-agent-skills/SKILL.md
+# or skills/meta/using-agent-skills/SKILL.md
 bash hooks/session-start-test.sh
 ```
 
@@ -109,7 +109,7 @@ One point worth internalizing rather than looking up: when writing trigger promp
 ## 6. Suggested reading order
 
 1. [README.md](../README.md): the catalog and the lifecycle diagram (10 min)
-2. `skills/using-agent-skills/SKILL.md`: how routing works from the agent's side
+2. `skills/meta/using-agent-skills/SKILL.md`: how routing works from the agent's side
 3. One well-established skill end to end (e.g. `test-driven-development`): internalize the anatomy by example
 4. [skill-anatomy.md](skill-anatomy.md): the format spec, now with context
 5. [evals/README.md](../evals/README.md): the three tiers and the case format
