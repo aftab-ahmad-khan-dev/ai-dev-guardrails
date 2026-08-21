@@ -21,6 +21,28 @@ Claude Code auto-reads `CLAUDE.md` at the repo root on every session — no setu
 - Do not add tests, docs, or config changes unless the user explicitly requested them as part of the current feature.
 - Stay silent on process when possible; just do the work and update the tracker.
 - Include token counts used per run along with features and also token used today along with last updated
+- Project structure
+
+Root folders named:
+api.domainname.com (backend)
+web.domainname.com (frontend)
+
+Code quality
+
+No source file exceeds ~400 lines of code
+Clean, professional folder structure
+Meaningful, professional variable / function / class names (no funky or abbreviated style)
+Proper separation of concerns (API vs client)
+
+Frontend (web.domainname.com)
+
+Reusable components extracted cleanly
+Tailwind CSS set up with proper theme variables (colors, spacing, radii, etc.)
+Professional dark / light mode support:
+System preference detection
+Manual toggle
+Persistent preference
+No flash of wrong theme
 ---
 
 ## User Prompt / Features
