@@ -20,7 +20,7 @@ Claude Code auto-reads `CLAUDE.md` at the repo root on every session — no setu
 - If a task is ambiguous, ask a short clarifying question instead of assuming and over-building.
 - Do not add tests, docs, or config changes unless the user explicitly requested them as part of the current feature.
 - Stay silent on process when possible; just do the work and update the tracker.
-
+- Include token counts used per run along with features and also token used today along with last updated
 ---
 
 ## User Prompt / Features
