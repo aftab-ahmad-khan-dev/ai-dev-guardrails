@@ -23,26 +23,26 @@ Claude Code auto-reads `CLAUDE.md` at the repo root on every session — no setu
 - Include token counts used per run along with features and also token used today along with last updated
 - Project structure
 
-Root folders named:
-api.domainname.com (backend)
-web.domainname.com (frontend)
+- Root folders named:
+- api.domainname.com (backend)
+- web.domainname.com (frontend)
 
-Code quality
+- Code quality
 
-No source file exceeds ~400 lines of code
-Clean, professional folder structure
-Meaningful, professional variable / function / class names (no funky or abbreviated style)
-Proper separation of concerns (API vs client)
+- No source file exceeds ~400 lines of code
+- Clean, professional folder structure
+- Meaningful, professional variable / function / class names (no funky or abbreviated style)
+- Proper separation of concerns (API vs client)
 
-Frontend (web.domainname.com)
+- Frontend (web.domainname.com)
 
-Reusable components extracted cleanly
-Tailwind CSS set up with proper theme variables (colors, spacing, radii, etc.)
-Professional dark / light mode support:
-System preference detection
-Manual toggle
-Persistent preference
-No flash of wrong theme
+- Reusable components extracted cleanly
+- Tailwind CSS set up with proper theme variables (colors, spacing, radii, etc.)
+- Professional dark / light mode support:
+- System preference detection
+- Manual toggle
+- Persistent preference
+- No flash of wrong theme
 ---
 
 ## User Prompt / Features
