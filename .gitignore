@@ -123,7 +123,6 @@ dist
 .tern-port
 
 # Stores VSCode versions used for testing VSCode extensions
-.vscode-test
 
 # pnpm
 .pnpm-store
@@ -153,9 +152,6 @@ vite.config.ts.timestamp-*
 
 # Editor / IDE local state
 .idea/
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json.example
 *.swp
 .DS_Store
 
@@ -181,3 +177,7 @@ vite.config.ts.timestamp-*
 skills-lock.json
 **/skills-lock.json
 # ai-dev-guardrails-skills-ignore-end
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore

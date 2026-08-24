@@ -21,7 +21,7 @@ Claude Code auto-reads `CLAUDE.md` at the repo root on every session — no setu
 - Do not add tests, docs, or config changes unless the user explicitly requested them as part of the current feature.
 - Stay silent on process when possible; just do the work and update the tracker.
 - Include token counts used per run along with features and also token used today along with last updated
-
+- Along with feat/fix/issue/update also write the name of author along with the token
 ## Project structure
 - Root folders named:
 - api.domainname.com (backend)
