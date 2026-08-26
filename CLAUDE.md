@@ -1,31 +1,20 @@
 # CLAUDE.md
 <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/ff23eaad-30be-4081-9701-54c9b9525af3" />
-
 **Repo:** https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails
-
 ---
-
 # How Claude Code Loads This File
-
 Claude Code automatically reads `CLAUDE.md` from the repository root at the beginning of every session.
-
 These instructions apply to all work performed in this repository.
-
 ---
-
 # 🛡️ PRIORITY #1 — SECURITY-FIRST RULE
-
 **Security is the highest priority and must be checked before any action.**
-
 Before implementing a feature, fixing an issue, installing or updating a dependency, executing unfamiliar code, or making changes to the project, first perform the appropriate security checks.
 
 ## Required Execution Order
-
 Claude must follow this order:
-
-1. Read and understand the requested task.
-2. Extract and identify the exact requested feature, fix, update, issue, or security task.
-3. Perform the relevant security pre-scan.
+1. Read and understand the requested task (or detect that no task has been given yet).
+2. Extract and identify the exact requested feature, fix, update, issue, or security task (if any).
+3. Perform the relevant security pre-scan (see Session-Start Mandatory Security Scan below).
 4. Check affected dependencies, packages, modules, scripts, and relevant code for vulnerabilities or malicious behavior.
 5. Only after the relevant security checks, perform the requested work.
 6. Verify that previously completed work has not been broken or regressed.
@@ -33,20 +22,29 @@ Claude must follow this order:
 
 Security checks must happen **before implementation**, not after everything has already been changed.
 
+## Session-Start Mandatory Security Scan
+On **every new session**, before asking the user for a task or looking for a tracker:
+
+1. Perform a **project-wide security pre-scan** (proportional but non-empty):
+   - List top-level structure (exclude `node_modules`, `.git`, build artifacts).
+   - Check for secrets / credentials patterns (`.env*`, hardcoded keys, API tokens in source).
+   - Inspect `package.json` / lockfile (if present) and run `npm audit --audit-level=moderate` (or equivalent) when Node is detected.
+   - Flag any install scripts, suspicious dependencies, or obvious SAST issues in entry-point files.
+2. Report a **one-paragraph Security Status** (Clean / Issues found + brief list).
+3. Only **after** the scan is complete:
+   - If the user already gave a concrete task → extract it, add to tracker, then implement.
+   - If no task was given → show the Security Status and then ask: “What would you like me to work on?”
+
+Do **not** run exploratory `ls`/`find`/`git status` loops that look for a tracker file before the security scan finishes.
+Never treat “no task yet” as permission to skip the security gate.
 ---
-
 # Dependency & Vulnerability Scanning (SCA)
-
 When relevant, check dependencies and packages for known vulnerabilities, suspicious behavior, or malicious code.
-
 Use appropriate available tools such as:
-
 - `npm audit`
 - `@nodesecure/scanner`
 - Retire.js
-
 Security checks should cover, where relevant:
-
 - Direct dependencies
 - Transitive dependencies
 - New packages
@@ -55,23 +53,15 @@ Security checks should cover, where relevant:
 - `package.json`
 - Lock files
 - Installation scripts
-
 Before adding or trusting a new dependency, inspect it appropriately.
-
 ---
-
 # Static Application Security Testing (SAST)
-
 When relevant, scan the actual application source code for insecure coding patterns.
-
 Use appropriate available tools such as:
-
 - `nodejsscan (njsscan)`
 - `eslint-plugin-security`
 - Equivalent security-focused static analysis tools
-
 Check for issues such as:
-
 - Injection vulnerabilities
 - Insecure authentication or authorization
 - Unsafe command execution
@@ -81,15 +71,10 @@ Check for issues such as:
 - Remote code execution risks
 - Insecure configurations
 - Dangerous dynamic code execution
-
 ---
-
 # Malicious Code & Package Review
-
 Before installing, executing, trusting, or introducing unfamiliar packages, modules, scripts, or external code, check where practical for suspicious behavior.
-
 Pay particular attention to:
-
 - `preinstall`
 - `install`
 - `postinstall`
@@ -109,23 +94,16 @@ Pay particular attention to:
 - Typosquatting
 - Suspicious package names
 - Behavior unrelated to the package's stated purpose
-
 If a serious vulnerability, malicious pattern, or suspicious dependency is discovered:
-
 1. Stop before using the affected dependency or code.
 2. Do not silently continue.
 3. Report the concern concisely.
 4. Prefer a safe alternative, patch, upgrade, removal, or mitigation.
 5. Continue only when the security concern has been appropriately addressed.
-
 > **Security principle: Scan first. Trust later. Implement only after the relevant security checks are complete.**
-
 Security checks should be proportional to the task. Do not repeatedly run unnecessary scans when nothing relevant has changed.
-
 ---
-
 # General Working Rules
-
 - Never commit yourself.
 - Do not run `git commit`, `git push`, or any commit-related command unless the user explicitly asks.
 - Never add yourself as an author, co-author, contributor, or generator in:
@@ -138,11 +116,8 @@ Security checks should be proportional to the task. Do not repeatedly run unnece
   - `Co-authored-by: Claude`
   - `Generated by Claude`
   - Any other self-attribution
-
 ---
-
 # Scope Control
-
 - Focus strictly on the functionality requested by the user.
 - Extract the exact feature or task from the user's prompt.
 - Implement only the requested functionality.
@@ -152,22 +127,15 @@ Security checks should be proportional to the task. Do not repeatedly run unnece
 - Do not expand the scope beyond the user's request.
 - Prefer surgical and minimal changes.
 - Touch only the files required for the requested work.
-
 If the request is ambiguous, ask a short clarifying question rather than assuming or over-building.
-
 ---
-
 # Previously Completed Work
-
 - Never break or regress previously completed features.
 - Before modifying related code, understand the relevant previously completed functionality.
 - Preserve completed features unless the user explicitly requests changes to them.
 - When working from this file, ignore completed items and work only on the next relevant uncompleted item or explicitly requested task.
-
 ---
-
 # Token Efficiency
-
 - Minimize unnecessary token usage.
 - Avoid long explanations.
 - Avoid unnecessary comments.
@@ -175,13 +143,9 @@ If the request is ambiguous, ask a short clarifying question rather than assumin
 - Do not repeat the user's prompt.
 - Do not generate documentation, marketing copy, decorative content, or additional material unless explicitly requested.
 - Prefer concise action over narrative.
-
 ---
-
 # Requested Work Processing
-
 The user may provide work in any of the following formats:
-
 1. `feat ...`
 2. `fix ...`
 3. `security ...`
@@ -189,25 +153,17 @@ The user may provide work in any of the following formats:
 5. `issue ...`
 6. `feat/fix ...`
 7. A plain-language description
-
 Claude must extract the requested work from the user's prompt.
-
 If the user provides a plain description, Claude must determine the appropriate type automatically.
-
 Valid types include:
-
 - `feat`
 - `fix`
 - `security`
 - `update`
 - `issue`
-
 ---
-
 # Feature / Task Extraction Rules
-
 When the user sends a new request:
-
 1. Read the request.
 2. Extract the exact requested work.
 3. Determine its type.
@@ -220,17 +176,15 @@ When the user sends a new request:
 10. Record completion details.
 11. Update token usage.
 12. Update the `Last updated` timestamp.
-
 If the request contains multiple clearly separate tasks, create separate sequential entries.
-
 Do not duplicate work already marked as completed unless the user explicitly requests a modification or fix.
-
 ---
-
 # Standard Development Tracker Format
 
-## New / Uncompleted Work
+The tracker lives **inside this CLAUDE.md** file (or a clearly named `TRACKER.md` if preferred).  
+Claude must maintain it. Do not search the filesystem for a tracker before the session-start security scan is done.
 
+## New / Uncompleted Work
 ```md
 - [ ] **type(N)**: short description of the requested work
   > *Added: YYYY-MM-DD HH:MM PKT*
