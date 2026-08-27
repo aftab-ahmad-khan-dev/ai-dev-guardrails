@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-**Repo:** aftab-ahmad-khan-dev/ai-dev-guardrails
+**Repo:** https://github.com/aftab-ahmad-khan-dev/ai-dev-guardrails
 
 ## How Claude Code loads this file
 
@@ -15,72 +15,117 @@ Claude Code auto-reads `CLAUDE.md` at the repo root on every session — no setu
 Before implementing a feature, fixing an issue, installing/updating a dependency, executing unfamiliar code, or making any project changes:
 
 1. Perform the required security pre-scan.
-2. Only after the scan is clean (or issues are reported and addressed) may work begin.
+2. Only after the scan is clean, or issues are reported and addressed, may work begin.
 
-## Session-Start Mandatory Security Scan
-
-On **every new session**, before asking for a task or touching the tracker:
-
-1. Run a project-wide security pre-scan (proportional but non-empty):
-
-   * Inspect top-level structure (skip `node_modules`, `.git`, build artifacts).
-   * Search for secrets / credentials patterns (`.env*`, hardcoded keys, API tokens).
-   * Inspect `package.json` / lockfiles.
-   * Run available SCA tools (see below).
-   * Flag install scripts, suspicious packages, or obvious SAST issues in entry points.
-2. Output a short **Security Status** paragraph (Clean / Issues found + brief list).
-3. Only then:
-
-   * If a concrete task was already given → extract it, add to tracker, implement.
-   * If no task yet → show Security Status and ask what to work on.
-
-Never skip the security gate. Never treat “no task yet” as permission to explore first.
+Never skip the security gate.
 
 ---
 
-# 🛡️ PRE-INSTALL SECURITY GATE (CRITICAL)
+# 🔍 SESSION-START MANDATORY SECURITY SCAN
 
-**Goal: never let untrusted dependency code execute before it has been reviewed.**
+On **every new session**, before asking for a task or touching the tracker:
 
-Claude must follow this order for **any dependency-related work**.
+1. Inspect top-level project structure.
+
+   * Skip `node_modules`.
+   * Skip `.git`.
+   * Skip build artifacts.
+2. Search for:
+
+   * secrets
+   * credentials
+   * API keys
+   * access tokens
+   * suspicious environment variables
+3. Inspect:
+
+   * `package.json`
+   * lockfiles
+   * relevant configuration
+4. Run available security scanners when already installed/available.
+5. Review:
+
+   * dependency lifecycle scripts
+   * suspicious packages
+   * obvious SAST issues
+   * suspicious entry-point behavior
+6. Output a short:
+
+**Security Status: Clean**
+
+or:
+
+**Security Status: Issues Found — <brief list>**
+
+7. Only then:
+
+   * If a concrete task was already provided → extract it, add it to the tracker, and implement it.
+   * If no task was provided → show Security Status and ask what to work on.
+
+Never treat "no task yet" as permission to explore unrelated project areas.
+
+---
+
+# 🛡️ PRE-INSTALL SECURITY GATE
+
+**Goal: never allow untrusted dependency code to execute before it has been reviewed.**
+
+Claude must follow this process for **all dependency-related work**.
 
 ## Phase 1 — Inspect Before Installation
 
-1. Inspect `package.json` and all relevant lockfiles first.
-2. Identify:
+Inspect:
 
-   * New packages
-   * Version changes
-   * Dependency ranges
-   * Direct dependencies
-   * Transitive dependencies
-   * Optional dependencies
-   * Peer dependencies
-   * Lifecycle scripts
-   * Git/tarball dependencies
-   * Unusual registries
-3. Check whether the requested package has a safer established alternative.
+* `package.json`
+* `package-lock.json`
+* `npm-shrinkwrap.json`
+* `yarn.lock`
+* `pnpm-lock.yaml`
+* `.npmrc`
+* workspace configuration
+
+Determine:
+
+* direct dependencies
+* transitive dependencies
+* version ranges
+* requested versions
+* package sources
+* Git dependencies
+* tarball dependencies
+* registry configuration
+* optional dependencies
+* peer dependencies
+* lifecycle scripts
+
+Do not install anything during this phase.
+
+---
 
 ## Phase 2 — Static Review
 
-Before installing an unfamiliar or replacement dependency:
+Before installing an unfamiliar dependency:
 
-* Review known metadata/source where available.
-* Check lifecycle scripts.
-* Check suspicious install behavior.
-* Check unnecessary filesystem access.
-* Check unexpected network activity.
-* Check obfuscation.
-* Check package provenance where available.
-* Check known vulnerability information.
+* Review package metadata.
+* Review lifecycle scripts.
+* Review known security information.
+* Review package provenance where available.
+* Look for suspicious filesystem access.
+* Look for unexpected network activity.
+* Look for obfuscation.
+* Look for unexpected binaries.
+* Look for behavior unrelated to the package's stated purpose.
+* Check whether an established alternative already exists.
 
-**Do not execute the package during this review.**
+Do not execute the dependency during review.
+
+---
 
 ## Phase 3 — Safe Installation
 
-When installation is eventually approved:
+When installation is explicitly approved:
 
-1. Prefer:
+Prefer:
 
 ```bash
 npm ci --ignore-scripts
@@ -92,13 +137,22 @@ or:
 npm install --ignore-scripts
 ```
 
-2. Immediately run available dependency/security checks.
-3. Only enable lifecycle scripts if explicitly required and the dependency has been reviewed.
-4. Never run a normal installation of an unfamiliar package before its lifecycle scripts and dependency information have been reviewed.
+Then perform the appropriate security checks.
+
+Only enable lifecycle scripts when:
+
+1. They are genuinely required.
+2. The dependency has been reviewed.
+3. Their behavior is understood.
+4. Continuing is appropriate for the task.
+
+Never blindly execute dependency lifecycle scripts.
+
+---
 
 ## Critical Rule
 
-If a package looks suspicious because of:
+If a dependency appears suspicious because of:
 
 * typosquatting
 * dependency confusion
@@ -107,52 +161,22 @@ If a package looks suspicious because of:
 * unexpected filesystem access
 * heavy obfuscation
 * credential/environment access
+* remote downloads
+* suspicious binaries
 * cryptocurrency-mining behavior
 * unrelated functionality
-* suspicious binaries
-* unexpected remote downloads
 
 then:
 
 **STOP → REPORT → DO NOT INSTALL → RECOMMEND A SAFE ALTERNATIVE.**
 
-Do not continue automatically.
-
-### Important
-
-Never use:
-
-```bash
-npm install
-```
-
-as the first step when investigating an unfamiliar dependency.
-
-Never use:
-
-```bash
-npm audit fix
-```
-
-as a substitute for dependency review.
-
-Never execute:
-
-```bash
-npx <unknown-package>
-```
-
-because `npx` may download and execute a package.
-
 ---
 
-# 🛡️ DEPENDENCY & VULNERABILITY SCANNERS (SCA)
+# 🛡️ DEPENDENCY & VULNERABILITY SCANNERS
 
-These tools may be used when relevant and available:
+Use available scanners when relevant.
 
-### npm audit
-
-Built-in npm dependency vulnerability scanner.
+## npm audit
 
 Prefer:
 
@@ -160,95 +184,58 @@ Prefer:
 npm audit --audit-level=moderate
 ```
 
-### @nodesecure/scanner
+## NodeSecure
 
-Dependency-tree and AST-oriented security analysis.
+Use `@nodesecure/scanner` when already available and appropriate.
 
-### Retire.js
+## Retire.js
 
-Detects known vulnerable JavaScript libraries.
+Use Retire.js when already available and relevant.
 
-### Coverage
+## SAST
 
-When relevant, review:
+When already available:
 
-* Direct dependencies
-* Transitive dependencies
-* `package.json`
-* Lockfiles
-* Existing `node_modules`
-* New / updated packages
-* Installation scripts
-* `preinstall`
-* `install`
-* `postinstall`
-* `prepare`
-
-Do not install a scanner solely for the purpose of running the scanner if doing so would violate the Pre-Install Security Gate.
-
----
-
-# 🔍 STATIC APPLICATION SECURITY TESTING (SAST)
-
-Scan actual application source code when relevant.
-
-Possible tools include:
-
-* `nodejsscan`
+* nodejsscan
 * Semgrep
 * ESLint security plugins
 * `eslint-plugin-security`
 
-Look for:
-
-* Injection vulnerabilities
-* Insecure authentication
-* Authorization problems
-* Unsafe command execution
-* Unsafe filesystem operations
-* Hardcoded secrets
-* Unsafe deserialization
-* RCE risks
-* Dynamic code execution
-* Insecure configuration
-* Dangerous dependency usage
-* Exposed credentials
-* Sensitive data leakage
-
-Security checks must remain proportional to the task.
+Do not install a security scanner merely to perform a scan if doing so would violate the dependency security gate.
 
 ---
 
 # 🔎 MALICIOUS CODE & PACKAGE REVIEW
 
-Before installing, executing, or trusting unfamiliar packages/modules/scripts, inspect for:
+Before trusting unfamiliar packages, scripts, or modules, inspect for:
 
-* Lifecycle scripts
-* Obfuscated code
-* Encoded payloads
-* Unexpected shell execution
-* Unexpected network requests
-* Hidden downloads
-* Data exfiltration
-* Credential access
-* Environment-variable harvesting
+* `preinstall`
+* `install`
+* `postinstall`
+* `prepare`
+* shell execution
+* remote downloads
+* unexpected network requests
+* data exfiltration
+* credential access
+* environment-variable harvesting
 * SSH key access
-* Browser credential access
-* Suspicious filesystem operations
-* Cryptocurrency mining
-* Dependency confusion
-* Typosquatting
-* Unexpected binaries
-* Persistence mechanisms
-* Behavior unrelated to the package's stated purpose
+* browser data access
+* filesystem manipulation
+* encoded/obfuscated JavaScript
+* suspicious binaries
+* persistence mechanisms
+* crypto-mining behavior
+* dependency confusion
+* typosquatting
 
 If a serious issue is found:
 
 1. Stop.
 2. Report the finding.
 3. Do not execute the suspicious code.
-4. Recommend removal, replacement, or a verified version.
-5. Continue only after the concern has been addressed.
+4. Recommend removal/replacement.
+5. Continue only after the concern is addressed.
 
 > **Security principle: Scan first. Trust later. Implement only after relevant checks are complete.**
 
@@ -256,80 +243,60 @@ If a serious issue is found:
 
 # 📋 GENERAL WORKING RULES
 
-* Never commit yourself. Do not run `git commit`, `git push`, or any commit-related commands unless the user explicitly asks.
-* Never add yourself as an author, co-author, or contributor in commits, PRs, changelogs, or file headers.
+* Never commit yourself.
+* Do not run `git commit`, `git push`, or commit-related commands unless the user explicitly asks.
+* Never add Claude, ChatGPT, AI, assistant, or any AI identity as an author.
 * Never add `Co-authored-by: Claude`.
 * Never add `Generated by Claude`.
-* Never add Claude, ChatGPT, AI, assistant, or any AI identity as an author.
-* Focus strictly on the user-provided functionality.
-* Extract the exact feature/task and implement only that.
-* Do not invent extra features.
-* Do not perform unsolicited refactoring.
+* Never add self-attribution.
+* Focus strictly on the user's requested functionality.
+* Do not invent features.
+* Do not add unsolicited polish.
+* Do not perform unrelated refactoring.
 * Do not expand scope.
+* Prefer surgical, minimal changes.
+* Touch only files required for the current task.
+* If a task is ambiguous, ask a short clarifying question.
+* Do not add tests unless explicitly requested.
+* Do not add documentation unless explicitly requested.
+* Do not add configuration unless required by the task.
+* Never break or regress previously completed features.
 * Minimize token usage.
 * Avoid unnecessary comments.
 * Avoid verbose summaries.
-* Prefer concise, direct action.
-* Prefer surgical, minimal changes.
-* Touch only files required for the current task.
-* If a task is ambiguous, ask a short clarifying question instead of assuming.
-* Do not add tests, documentation, or configuration changes unless explicitly requested as part of the current task.
-* Stay silent on process when possible; just do the work and update the tracker.
-* Never break or regress previously completed features.
+* Stay silent on process when possible.
 
 ---
 
-# 👤 UNIVERSAL TASK AUTHOR RULE
+# 👤 GITHUB AUTHOR RULE
 
 The `Author` field must **always contain the verified GitHub username responsible for the task.**
 
 ## Mandatory Rules
 
 * `Author` = GitHub username only.
-* Never use Claude, ChatGPT, AI, assistant, system, or any AI identity as the author.
-* Never use a person's real name unless that is also their verified GitHub username.
+* Never use a person's real name unless it is also their verified GitHub username.
 * Never use an email address.
+* Never use Claude.
+* Never use Cursor.
+* Never use ChatGPT.
+* Never use AI.
 * Never invent a GitHub username.
 * If the task explicitly provides a GitHub username, use it.
-* If the GitHub username can be safely verified from the repository/GitHub context, use it.
-* If the GitHub username cannot be determined safely, use:
-  `Author: <GitHub username required>`
-* Do not assume the repository owner is automatically the author unless the username is verified.
-* Claude must never add itself as an author, co-author, contributor, or credit.
+* If the GitHub username can be safely verified from repository/GitHub context, use it.
+* If it cannot be verified, use:
 
-## Correct Format
-
-```md
-> *Author: github-username*
+```text
+Author: <GitHub username required>
 ```
 
-## Invalid Formats
-
-Never use:
-
-```md
-> *Author: Claude*
-```
-
-```md
-> *Author: ChatGPT*
-```
-
-```md
-> *Author: AI*
-```
-
-```md
-> *Author: Aftab Ahmad Khan*
-```
-
-unless `Aftab Ahmad Khan` is verified to be the GitHub username.
+Do not assume the repository owner is automatically the author without verification.
 
 ---
 
 # 📝 UNIVERSAL TASK COMMENT / TRACKER RULE
 
-Every tracked task **must have a concise comment directly below the corresponding task entry.**
+Every tracked task must have a concise **Comment** directly below the task entry.
 
 This applies to:
 
@@ -339,34 +306,29 @@ This applies to:
 * `update`
 * `issue`
 * `feat/fix`
-* Any other tracked work
+* any other tracked work
 
 The comment must:
 
-* Be directly below the task entry.
-* Explain what was done or what needs to be done.
-* Mention important implementation details when relevant.
-* Reflect the actual current status.
-* Remain concise and factual.
-* Never contain invented information.
-* Never contain unrelated commentary.
+* appear directly below the task
+* explain what was done or needs to be done
+* reflect the actual status
+* remain concise
+* contain factual information only
+* never claim work that was not performed
 
-## When Adding a Task
+## New Task
 
 ```md
-### New / Uncompleted
-
 - [ ] **feat(N)**: short description of the requested work
   > *Added: YYYY-MM-DD HH:MM PKT*
   > *Author: github-username*
   > *Comment: Briefly describe what needs to be done.*
 ```
 
-## When Completing a Task
+## Completed Task
 
 ```md
-### Completed
-
 - [x] **feat(N)**: short description of the requested work
   > *Added: YYYY-MM-DD HH:MM PKT*
   > *Completed: YYYY-MM-DD HH:MM PKT*
@@ -375,7 +337,7 @@ The comment must:
   > *Token Usage: <usage if available>*
 ```
 
-## When a Task Is Blocked
+## Blocked Task
 
 ```md
 - [ ] **issue(N)**: short description
@@ -384,27 +346,11 @@ The comment must:
   > *Comment: Blocked because <specific reason>. Remaining work: <specific action>.*
 ```
 
-## Tracker Rules
-
-1. Create the task entry first.
-2. Immediately place the comment directly underneath it.
-3. Keep the comment synchronized with actual work.
-4. When work progresses, update the comment accordingly.
-5. When work is completed, mark the task `[x]`.
-6. Update the comment with the final result.
-7. Never leave a tracked task without a comment.
-8. Never create a separate comments section for individual task comments.
-9. Do not write lengthy explanations inside comments.
-10. Do not claim something was completed unless it was actually completed.
-11. Do not claim a security scan was clean if issues were found.
-12. If security issues prevent implementation, record that fact in the task comment.
-13. The author must always be the verified GitHub username.
-
 ---
 
 # 📊 TRACKER WORKFLOW
 
-When receiving new work, Claude must:
+When receiving new work:
 
 1. Parse the request.
 2. Determine the type:
@@ -416,92 +362,480 @@ When receiving new work, Claude must:
    * `issue`
    * `feat/fix`
 3. Normalize the request.
-4. Assign the next sequential number `N`.
-5. Add the task as unchecked.
-6. Immediately add its Task Comment.
-7. Perform the required security checks.
-8. Complete only the requested work.
-9. Update the Task Comment during completion when necessary.
-10. Mark the task `[x]` when successfully completed.
-11. Add:
+4. Find the highest existing task number.
+5. Assign the next sequential number.
+6. Add the task as unchecked.
+7. Immediately add its Comment.
+8. Perform the required security checks.
+9. Implement only the requested work.
+10. Update the Comment when necessary.
+11. Mark the task `[x]` only after successful completion.
+12. Add:
 
 * completion date
 * completion time
-* notes
-* verified GitHub author
-* token usage
+* verified GitHub username
+* token usage when available
 
-12. Update `Last updated`.
-13. Update the daily token total.
+13. Update `Last updated`.
+14. Update the daily token total when supported.
 
 ---
 
-# 📌 STANDARD TRACKER ENTRY FORMAT
+# 🔢 TASK NUMBERING
 
-## New / Uncompleted
+* Task numbers must always be sequential.
+* Never reuse a previous number.
+* Never renumber completed tasks.
+* Never delete completed tracker history.
+* Find the highest existing `N` before adding a new task.
+* New task = highest existing `N + 1`.
 
-```md
-### New / Uncompleted
+---
 
-- [ ] **type(N)**: short description of the requested work
-  > *Added: YYYY-MM-DD HH:MM PKT*
-  > *Author: github-username*
-  > *Comment: Briefly describe what needs to be done.*
+# 🎯 TASK SCOPE
+
+The user's current request defines the scope.
+
+Do not automatically:
+
+* redesign unrelated UI
+* refactor unrelated code
+* upgrade unrelated packages
+* change architecture
+* rename unrelated files
+* rewrite working components
+* add unrelated features
+* add documentation
+* add tests
+* change configuration
+
+unless explicitly requested or strictly required.
+
+---
+
+# 🎨 AI DESIGN, UI/UX & DEVELOPMENT SKILLS
+
+These are preferred design and development resources.
+
+They are **references and workflow tools, not automatic installation authorization**.
+
+---
+
+## 1. Taste Skill
+
+Official website:
+
+https://www.tasteskill.dev/
+
+Documentation:
+
+https://www.tasteskill.dev/docs
+
+Prompt guide:
+
+https://www.tasteskill.dev/guide
+
+GitHub:
+
+https://github.com/Leonxlnx/taste-skill
+
+Taste Skill is designed to reduce generic AI-generated frontend patterns and improve layout, typography, spacing, motion, design-system thinking, and frontend quality. Its current documentation lists Cursor and Claude Code among compatible agents.
+
+Use it when relevant for:
+
+* frontend design
+* UI/UX
+* visual hierarchy
+* layout direction
+* typography
+* spacing
+* design systems
+* anti-generic design
+* redesign audits
+* responsive composition
+* visual pre-flight checks
+
+For existing projects, prefer an audit-first approach before redesigning.
+
+Do not blindly replace an existing design system.
+
+---
+
+## 2. Impeccable
+
+Official website:
+
+https://impeccable.style/
+
+Use it for:
+
+* UI audits
+* visual polish
+* typography
+* spacing
+* color systems
+* accessibility
+* responsive design
+* UI refinement
+* design-system consistency
+* identifying weak AI-generated design patterns
+
+When improving an existing interface:
+
+1. Inspect the current design system.
+2. Identify weak areas.
+3. Preserve working conventions.
+4. Make targeted improvements.
+5. Verify the result.
+
+Do not redesign unrelated UI.
+
+---
+
+## 3. Emil Kowalski — Design Engineering
+
+Official website:
+
+https://emilkowal.ski/skill
+
+Official skills repository:
+
+https://github.com/emilkowalski/skills
+
+Use it for:
+
+* animation
+* micro-interactions
+* transitions
+* hover states
+* component polish
+* motion design
+* interaction quality
+* animation review
+* UI details
+
+The current repository includes `emil-design-eng`, `review-animations`, `improve-animations`, `find-animation-opportunities`, and other design-engineering skills.
+
+Animations must:
+
+* serve a purpose
+* remain performant
+* avoid excessive motion
+* respect reduced-motion preferences
+* avoid distracting users
+* use appropriate easing
+* avoid unnecessary animation libraries
+
+---
+
+## 4. ImageToCode
+
+Use image/design references when the user provides them.
+
+Use references to understand:
+
+* layout
+* spacing
+* typography
+* hierarchy
+* component structure
+* visual relationships
+* responsive behavior
+
+Do not blindly reproduce implementation details.
+
+Preserve the project's architecture.
+
+---
+
+## 5. Playwright CLI
+
+Official website:
+
+https://playwright.dev/
+
+Use Playwright when it is already available and relevant.
+
+Use it to:
+
+* open the application
+* verify pages
+* inspect navigation
+* test responsive layouts
+* capture screenshots
+* identify visual regressions
+* inspect console errors
+* verify interactions
+* verify forms
+* validate user flows
+
+Do not install Playwright automatically.
+
+If Playwright is unavailable, do not install it unless explicitly requested and the dependency security gate has been completed.
+
+---
+
+## 6. OmniRoute
+
+GitHub:
+
+https://github.com/rgplvr/omniroute
+
+Use OmniRoute concepts when the workflow uses multiple AI models/providers.
+
+Use it for:
+
+* model routing
+* model selection
+* provider selection
+* task-specific routing
+* reducing unnecessary model costs
+* improving model utilization
+
+Do not install or configure OmniRoute automatically.
+
+Its current documentation includes Claude Code configuration and model-routing support.
+
+---
+
+## 7. Claude Mem
+
+Use persistent-memory concepts when an approved memory system is available.
+
+Goals:
+
+* preserve useful project context
+* remember architecture decisions
+* avoid repeated discovery
+* maintain continuity between sessions
+
+Never store:
+
+* passwords
+* API keys
+* access tokens
+* private credentials
+* secrets
+* sensitive personal information
+
+Do not install or configure a memory system automatically.
+
+---
+
+## 8. Headroom
+
+GitHub:
+
+https://github.com/anthonybo/headroom
+
+Use Headroom concepts for:
+
+* context management
+* token awareness
+* session visibility
+* context-window monitoring
+* long-running AI development sessions
+
+Do not install automatically.
+
+The current Headroom project provides a Claude Code statusline showing model, effort, context, spend, and rate-limit headroom.
+
+---
+
+## 9. Claude Code Setup
+
+Use Claude Code workflow best practices where applicable.
+
+Prioritize:
+
+* clear project instructions
+* security-first execution
+* predictable task tracking
+* minimal context waste
+* consistent project conventions
+* controlled dependency changes
+* explicit scope
+
+Do not modify Claude Code configuration unless required by the user's task.
+
+---
+
+## 10. Task Observer
+
+Use task-observation principles to maintain visibility into agent work.
+
+Track:
+
+* current task
+* modified files
+* dependency changes
+* security findings
+* completed work
+* blocked work
+* remaining work
+
+The project tracker remains the source of truth.
+
+Every tracked task must have a Comment directly below it.
+
+---
+
+# 🖥️ FRONTEND DESIGN STANDARD
+
+For frontend work, combine relevant principles from:
+
+1. Taste Skill
+2. Impeccable
+3. Emil Kowalski's design-engineering principles
+4. Image/design references
+5. Playwright browser verification when available
+
+Prioritize:
+
+* strong visual hierarchy
+* intentional layouts
+* excellent typography
+* consistent spacing
+* responsive behavior
+* accessibility
+* useful motion
+* performance
+* interaction feedback
+* visual consistency
+* production readiness
+
+Avoid:
+
+* generic AI layouts
+* excessive cards
+* random gradients
+* unnecessary glassmorphism
+* excessive rounded containers
+* weak typography
+* poor contrast
+* meaningless animations
+* decorative elements without purpose
+* repetitive layouts
+* placeholder-looking interfaces
+* excessive shadows
+* unnecessary badges
+* generic "AI slop" patterns
+
+---
+
+# 🔐 TOOL / SKILL SECURITY RULE
+
+External skills, plugins, CLIs, scripts, and development tools are **not automatically trusted**.
+
+Before installing any tool:
+
+1. Identify the official source.
+2. Review its installation method.
+3. Review dependencies.
+4. Review lifecycle scripts where applicable.
+5. Check whether it modifies project files.
+6. Check whether it executes remote code.
+7. Check whether it requires elevated permissions.
+8. Check whether it requires credentials or sensitive files.
+9. Prefer official repositories/documentation.
+10. Do not install automatically.
+
+If installation is required:
+
+**STOP → REVIEW → REPORT → WAIT FOR APPROVAL**
+
+unless the user has explicitly approved that specific installation.
+
+Never pipe an unknown remote script directly into a shell.
+
+Never install a tool merely because it is mentioned in this file.
+
+---
+
+# 🚫 NO AUTOMATIC INSTALLATION
+
+The resources listed in this file are **preferred references and workflow capabilities**.
+
+Their presence does NOT authorize:
+
+```bash
+npm install
+npm ci
+npx
+curl | bash
+wget | sh
 ```
 
-## Completed
+It also does not authorize:
 
-```md
-### Completed
+* global package installation
+* plugin installation
+* CLI installation
+* system-level installation
 
-- [x] **type(N)**: short description of the requested work
-  > *Added: YYYY-MM-DD HH:MM PKT*
-  > *Completed: YYYY-MM-DD HH:MM PKT*
-  > *Author: github-username*
-  > *Comment: Brief summary of the implementation and final result.*
-  > *Token Usage: <usage if available>*
-```
+Normal security and dependency gates still apply.
+
+---
+
+# 🎯 DESIGN DECISION RULE
+
+Before implementing significant frontend design changes:
+
+1. Understand the product and user goal.
+2. Inspect the existing design system.
+3. Identify the page/surface type.
+4. Determine the appropriate visual direction.
+5. Audit existing UI where appropriate.
+6. Reuse existing tokens/components where possible.
+7. Implement only requested changes.
+8. Verify in the browser when possible.
+9. Check responsive behavior.
+10. Check accessibility.
+11. Check interaction quality.
+12. Avoid unnecessary redesign.
+
+**Do not use a tool just because it exists. Use it only when it materially improves the current task.**
 
 ---
 
 # 📁 PROJECT STRUCTURE
 
-Root folders:
+Expected root folders:
 
 ```text
 api.domainname.com/
 web.domainname.com/
 ```
 
-### Backend
+## Backend
 
 `api.domainname.com`
 
 Contains backend/API functionality.
 
-### Frontend
+## Frontend
 
 `web.domainname.com`
 
 Contains frontend/client functionality.
 
-Maintain proper separation between API and client code.
+Maintain clear separation between API and client code.
 
 ---
 
 # 🧹 CODE QUALITY
 
 * No source file should exceed approximately 400 lines.
-* Maintain a clean and professional folder structure.
+* Maintain a clean folder structure.
 * Use meaningful variable names.
 * Use meaningful function names.
 * Use meaningful class names.
-* Avoid funky, cryptic, or abbreviated naming.
-* Maintain proper separation of concerns.
-* Keep API and client responsibilities separated.
-* Prefer reusable code over unnecessary duplication.
+* Avoid cryptic abbreviations.
+* Maintain separation of concerns.
+* Prefer reusable components.
 * Avoid unnecessary abstraction.
-* Do not refactor unrelated code.
+* Avoid unrelated refactoring.
 
 ---
 
@@ -509,9 +843,9 @@ Maintain proper separation between API and client code.
 
 * Use reusable components.
 * Extract reusable components cleanly.
-* Use Tailwind CSS.
-* Maintain proper theme variables.
-* Define reusable:
+* Use Tailwind CSS when already established.
+* Maintain reusable theme variables.
+* Maintain consistent:
 
   * colors
   * spacing
@@ -521,14 +855,14 @@ Maintain proper separation between API and client code.
 
 ## Dark / Light Mode
 
-The frontend must support:
+When supported by the project:
 
-* System preference detection.
-* Manual theme toggle.
-* Persistent user preference.
-* No flash of incorrect theme during initial load.
+* Detect system preference.
+* Provide manual toggle.
+* Persist preference.
+* Prevent flash of incorrect theme.
 
-Do not introduce a theme system change unless required by the current task.
+Do not introduce or redesign the theme system unless explicitly requested.
 
 ---
 
@@ -545,7 +879,7 @@ Any task involving:
 * APIs
 * dependencies
 * packages
-* database access
+* databases
 * file uploads
 * command execution
 * filesystem access
@@ -553,11 +887,11 @@ Any task involving:
 * environment variables
 * external services
 
-must receive an appropriate security review before implementation.
+requires an appropriate security review.
 
-Do not weaken an existing security control merely to make a feature work.
+Never weaken an existing security control merely to make a feature work.
 
-If a requested implementation creates a significant security concern:
+If a significant security concern appears:
 
 **STOP → REPORT → ASK FOR DIRECTION.**
 
@@ -565,9 +899,9 @@ If a requested implementation creates a significant security concern:
 
 # 🚫 DANGEROUS COMMAND RULE
 
-Claude must not execute commands that can cause destructive or system-wide changes unless explicitly required and explicitly approved by the user.
+Do not execute destructive or system-wide commands unless explicitly required and explicitly approved.
 
-Examples include:
+Examples:
 
 ```bash
 sudo
@@ -580,12 +914,10 @@ git clean -fd
 git push --force
 ```
 
-Also avoid commands that can modify files outside the repository.
-
-If a destructive command appears necessary:
+If such a command appears necessary:
 
 1. Stop.
-2. Explain exactly what it would do.
+2. Explain what it does.
 3. Ask for explicit approval.
 4. Never assume approval.
 
@@ -593,19 +925,7 @@ If a destructive command appears necessary:
 
 # 🌐 NETWORK / EXTERNAL RESOURCE RULE
 
-Do not download or execute unknown external content.
-
-Before using:
-
-* remote scripts
-* curl-piped scripts
-* wget-piped scripts
-* unknown binaries
-* unverified installers
-* unknown npm packages
-* external executables
-
-perform appropriate review first.
+Do not blindly download or execute remote content.
 
 Never blindly execute:
 
@@ -619,23 +939,25 @@ or:
 wget <url> | sh
 ```
 
+Review external resources before execution.
+
 ---
 
 # 📦 DEPENDENCY CHANGE RULE
 
 Any dependency change requires:
 
-1. Identify why the dependency is needed.
-2. Inspect the existing dependency configuration.
-3. Check for an existing package that already provides the functionality.
+1. Identify why it is needed.
+2. Inspect existing dependency configuration.
+3. Check whether an existing package already provides the functionality.
 4. Review the proposed package.
-5. Review its version and dependency requirements.
+5. Review its version and requirements.
 6. Review lifecycle scripts.
-7. Review known security issues.
+7. Review security concerns.
 8. Prefer established alternatives.
 9. Install with scripts disabled initially where practical.
-10. Scan after installation.
-11. Only enable lifecycle scripts when necessary and explicitly justified.
+10. Run appropriate security checks.
+11. Enable lifecycle scripts only when necessary and justified.
 
 Never add a dependency simply because it is convenient.
 
@@ -645,12 +967,11 @@ Never add a dependency simply because it is convenient.
 
 Do not add tests unless explicitly requested.
 
-When testing is already available in the project:
+When existing tests are available:
 
 * Prefer existing tests.
 * Do not modify unrelated tests.
-* Do not disable tests merely to make the task pass.
-* Do not hide failures.
+* Do not disable tests to hide failures.
 * Report failures honestly.
 
 For dependency/security work, never execute potentially unsafe dependency code merely to obtain a test result.
@@ -661,40 +982,17 @@ For dependency/security work, never execute potentially unsafe dependency code m
 
 Before completing a task:
 
-* Verify the requested functionality.
-* Ensure existing functionality was not intentionally removed.
+* Verify requested functionality.
 * Review changed files.
-* Check for accidental changes.
+* Check accidental changes.
+* Confirm completed functionality remains intact.
 * Confirm security requirements remain intact.
-
-Do not expand scope merely to improve unrelated areas.
-
----
-
-# 📌 TASK SCOPE RULE
-
-The user's current request defines the scope.
-
-Claude must not automatically:
-
-* redesign unrelated UI
-* refactor unrelated code
-* upgrade unrelated packages
-* change architecture
-* rename unrelated files
-* rewrite working components
-* add unrelated features
-* add documentation
-* add tests
-* change configuration
-
-unless explicitly requested.
 
 ---
 
 # 🛑 STOP CONDITIONS
 
-Claude must stop and report instead of continuing if:
+Stop and report instead of continuing if:
 
 * A serious security issue is discovered.
 * A dependency appears malicious or highly suspicious.
@@ -702,8 +1000,8 @@ Claude must stop and report instead of continuing if:
 * A command could delete significant project data.
 * Credentials are discovered.
 * A required dependency cannot be safely reviewed.
-* The requested change conflicts with an existing security control.
-* The requested behavior is ambiguous and implementation would require guessing.
+* The requested change conflicts with security controls.
+* The task is ambiguous.
 * The task requires access outside the repository without explicit authorization.
 
 When stopped:
@@ -717,21 +1015,19 @@ When stopped:
 
 # 📅 TRACKER DATE / TIME
 
-Use Pakistan Standard Time (PKT / UTC+05:00) for tracker timestamps.
-
-Format:
+Use Pakistan Standard Time:
 
 ```text
 YYYY-MM-DD HH:MM PKT
 ```
 
-Use the actual current date and time available to the environment.
+Use the actual current date/time available to the environment.
 
 ---
 
 # 📈 TOKEN USAGE
 
-When token usage is available, record it in completed tracker entries.
+When available, record token usage in completed tracker entries.
 
 Example:
 
@@ -739,7 +1035,7 @@ Example:
 > *Token Usage: 12,450*
 ```
 
-Update the daily token total when the project's tracker supports it.
+Update the daily token total when supported.
 
 ---
 
@@ -747,14 +1043,86 @@ Update the daily token total when the project's tracker supports it.
 
 > **Scan first. Trust later. Change minimally. Execute only what is necessary.**
 
-Security checks are mandatory before relevant actions.
-
-Never bypass the security gate merely because a task appears simple.
-
-Never trade security for convenience.
+Security comes before implementation.
 
 Never install first and investigate later.
 
 Never execute unknown code to determine whether it is safe.
 
-**Security comes before implementation.**
+Never sacrifice security for convenience.
+
+Never modify unrelated functionality.
+
+Never break previously completed work.
+
+**Security → Scope → Implementation → Verification → Tracker Update**
+
+---
+
+# 📋 USER PROMPT / FEATURES
+
+**Valid task formats:**
+
+1. `feat ....`
+2. `fix ....`
+3. `security ....`
+4. `update ....`
+5. `issue ....`
+6. `feat/fix ....`
+7. Plain description
+
+When receiving new work:
+
+1. Parse the request.
+2. Determine the type.
+3. Normalize it.
+4. Find the highest task number.
+5. Assign the next sequential number.
+6. Add it unchecked.
+7. Add the Comment directly below it.
+8. Perform security checks.
+9. Implement only the requested work.
+10. Mark completed only after successful completion.
+11. Add completion metadata.
+12. Update `Last updated`.
+
+---
+
+# 📌 STANDARD TRACKER ENTRY
+
+## New / Uncompleted
+
+```md
+- [ ] **type(N)**: short description of the requested work
+  > *Added: YYYY-MM-DD HH:MM PKT*
+  > *Author: github-username*
+  > *Comment: Briefly describe what needs to be done.*
+```
+
+## Completed
+
+```md
+- [x] **type(N)**: short description of the requested work
+  > *Added: YYYY-MM-DD HH:MM PKT*
+  > *Completed: YYYY-MM-DD HH:MM PKT*
+  > *Author: github-username*
+  > *Comment: Brief summary of what was implemented and the final result.*
+  > *Token Usage: <usage if available>*
+```
+
+<!--
+Completed items must remain intact.
+Cursor/Claude must not delete previous tracker history.
+Every task must have a Comment directly below it.
+Author must always be a verified GitHub username.
+-->
+
+* [ ] **feat(1)**: (awaiting first user feature)
+
+  > *Added: 2026-08-27 14:11 PKT*
+  > *Author: <GitHub username required>*
+  > *Comment: Awaiting the first user-provided feature or task.*
+
+---
+
+*Last updated: 2026-08-27 14:11 PKT*
