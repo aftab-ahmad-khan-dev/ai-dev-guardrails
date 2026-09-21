@@ -23,8 +23,9 @@ Nothing in this file is repo-specific: §A8 resolves `<domain>` from whatever re
 | D | Group 3 — Design / Frontend Work | asked (+ design-type sub-question) |
 | E | Group 4 — Tool / Skill Installation | asked |
 | F | Group 5 — SRS / Requirements Documentation Work | asked (+ requirement-gathering loop) |
-| G | Tracker Entry Templates | reference — lives inside this file |
-| H | Root README.md Structure | reference — applied only when README work is explicitly requested |
+| G | Group 6 — Tauri 2 Desktop / Mobile Work | asked — only when Tauri is explicitly requested (shared web codebase) |
+| H | Tracker Entry Templates | reference — lives inside this file |
+| I | Root README.md Structure | reference — applied only when README work is explicitly requested |
 
 ## 0️⃣ SESSION-START MENU
 
@@ -60,6 +61,11 @@ What are we working on?
 5) SRS / requirements documentation (Group 5 — Part F)
    → Asks a series of short question rounds to understand the project
      fully, then drafts a structured SRS document and tracks it.
+
+6) Tauri 2 desktop / mobile work (Group 6 — Part G)
+   → Confirms desktop/mobile/both scope, keeps one shared web frontend
+     for every target, applies Tauri's default-deny capabilities model,
+     and only wires up signing/store distribution when explicitly asked.
 ```
 
 Each option's description is what actually happens once picked — not just a label. Rules:
@@ -69,6 +75,7 @@ Each option's description is what actually happens once picked — not just a la
 - A request can span more than one Group (e.g. "spec out and then build a new dashboard" = Group 5 then Group 3, or "add a new UI library and build a component with it" = Group 2 then Group 3) — call that out and sequence them.
 - Picking Group 3 (Design/Frontend) triggers the design-type sub-question in §D0 first.
 - Picking Group 5 (SRS) triggers the requirement-gathering question loop in §F0 first — this is the same engine as §A15, applied specifically to full requirements capture.
+- Picking Group 6 (Tauri) never adds a desktop/mobile shell on its own initiative — only when asked — and commonly combines with Group 2 (adding the Tauri dependency) and/or Group 3 (the shared frontend UI itself).
 
 ## 🛡️ PART A — COMPULSORY BASELINE
 
@@ -119,7 +126,7 @@ External skills, plugins, CLIs, scripts, and dev tools (including everything lis
 2. If none of those exist yet, derive `<domain>` from the repo name: take the current repository name (from `git remote get-url origin`, or the folder name if there's no remote yet) as the base, e.g. repo `vorkspro` → `vorkspro.com`.
 3. If the repo name already looks like a domain (contains a dot, e.g. `acme-app.io`), use it as-is instead of appending `.com`.
 4. If it's still genuinely unclear which domain applies (conflicting signals, or a real production project with no clear domain anywhere), ask once rather than guessing a TLD silently.
-5. Reuse the same resolved `<domain>` consistently everywhere: folder names, README badges/links (see Part H), env var defaults, CORS origins, etc. Never mix a resolved domain in one place and the literal word `domainname.com` in another.
+5. Reuse the same resolved `<domain>` consistently everywhere: folder names, README badges/links (see Part I), env var defaults, CORS origins, etc. Never mix a resolved domain in one place and the literal word `domainname.com` in another.
 
 Expected root folders, built from the resolved `<domain>`:
 
@@ -205,7 +212,7 @@ Selecting this Group bundles the following — all apply together, no separate c
 
 This global file is the **shared ruleset only** — it never holds a live task tracker itself. The task tracker for any given project lives in **that project's own root `CLAUDE.md`**, never a separate `TRACKER.md`/`TODO.md`/`ISSUES.md`, and never mixed into this global file, unless the user explicitly asks for GitHub Issues/Projects instead.
 
-If the project doesn't already have its own root `CLAUDE.md`, create one the first time tracker work actually starts on that project — seeded with a `📍 TRACKER` section at the bottom using the templates in Part G. Every new entry is appended under that project's `TRACKER` heading, and its own `Last updated` line is bumped after each change.
+If the project doesn't already have its own root `CLAUDE.md`, create one the first time tracker work actually starts on that project — seeded with a `📍 TRACKER` section at the bottom using the templates in Part H. Every new entry is appended under that project's `TRACKER` heading, and its own `Last updated` line is bumped after each change.
 
 ### B1. Universal Task Comment Rule
 
@@ -214,7 +221,7 @@ Every tracked task (`feat`, `fix`, `security`, `update`, `issue`, `feat/fix`, `s
 ### B2. Tracker Workflow
 
 1. Parse the request; determine type; normalize it.
-2. Per §B0, locate that project's own root `CLAUDE.md` (creating it from Part G if it doesn't exist yet); find the highest existing task number there; assign N + 1.
+2. Per §B0, locate that project's own root `CLAUDE.md` (creating it from Part H if it doesn't exist yet); find the highest existing task number there; assign N + 1.
 3. Add the task unchecked; immediately add its Comment.
 4. Confirm which other Group(s) this task also touches (e.g. a feature needing a new package pulls in Group 2 as well; a feature needing a spec first pulls in Group 5) and apply those bundles too.
 5. Implement only the requested work.
@@ -230,7 +237,7 @@ Sequential only. Never reuse, never renumber completed tasks, never delete compl
 
 The current request defines the scope. Do not automatically redesign unrelated UI, refactor unrelated code, upgrade unrelated packages, change architecture, rename unrelated files, rewrite working components, add unrelated features/documentation/tests/configuration — unless explicitly requested or strictly required.
 
-(Entry templates are in Part G.)
+(Entry templates are in Part H.)
 
 ## 📦 PART C — GROUP 2: DEPENDENCY / PACKAGE WORK
 
@@ -429,7 +436,35 @@ Every functional requirement gets a stable ID (FR-1, FR-2, …) so later tracker
 - Treat the SRS as living documentation: don't silently rewrite an accepted version. New changes get a dated entry in the Revision History (§F1, 6.2) — never delete prior revision history.
 - Once an SRS is accepted, subsequent feat/fix tracker entries for that project should reference the relevant FR- ID(s) in their Comment where practical, so implementation traces back to the spec.
 
-## 📌 PART G — TRACKER ENTRY TEMPLATES
+## 🦀 PART G — GROUP 6: TAURI 2 DESKTOP / MOBILE WORK
+
+Selecting this Group bundles the following — all apply together, no separate confirmation needed:
+
+### G1. Trigger & Scope
+
+This Group only activates when the task explicitly asks for Tauri (a Tauri 2 desktop app, a Tauri mobile/Android/iOS build, or wrapping an existing web app to ship via Tauri) — never introduce a desktop/mobile shell on your own initiative. Before scaffolding, confirm which surfaces are actually wanted: desktop only, mobile only, or both. Adding `@tauri-apps/cli`/the `tauri` Rust crate to a project that doesn't already have it is a dependency change — it goes through Group 2 (§C) first.
+
+### G2. One Web Codebase, Three Shells
+
+The existing web frontend (`web.<domain>` / `apps/web` per §A8) stays the single source of UI. Point `tauri.conf.json`'s `build.frontendDist`/`devUrl` at that same frontend for both desktop and mobile builds — never fork a separate UI codebase per platform unless the user explicitly asks for one. Handle platform differences (native menus, safe-area insets, touch vs. pointer input, which native APIs are available) with runtime platform detection inside the shared codebase (`@tauri-apps/plugin-os`, capability checks, responsive CSS), not by branching into separate apps. `src-tauri/` lives alongside that shared frontend, never inside `api.<domain>/`.
+
+### G3. Security — Capabilities, Not Allowlist
+
+Tauri 2 replaced v1's allowlist with a default-deny **capabilities** system (`src-tauri/capabilities/*.json`): every command a webview may call must be explicitly granted to a specific window. Never widen a capability (`"windows": ["*"]`, broad `fs`/`shell`/`http` scopes) just to unblock a feature — scope it to the narrowest window and permission that works, per §A3. A relaxed Content-Security-Policy (`app.security.csp` in `tauri.conf.json`) or `dangerousDisableAssetCspModification` is a security-review trigger, not a default fix for a blocked asset load. Any Tauri plugin (`shell`, `fs`, `http`, `sql`, `updater`, `os`, or a community plugin) goes through §A7/§C1 before it's added — review what commands and default permissions it actually exposes, not just its README. Never enable the `shell` plugin's `execute`/`open` on user-controlled input — treat that with the same suspicion §A5 gives `curl | bash`. Only ever scope a capability's `remote` field to domains the project actually controls.
+
+### G4. Project Structure & Mobile Init
+
+Desktop and mobile share one `src-tauri/` Rust crate; `tauri android init` / `tauri ios init` generate `src-tauri/gen/android/` and `src-tauri/gen/apple/` — these are generated build artifacts, not hand-authored code, so prefer changing `tauri.conf.json`/plugin config over hand-editing generated Gradle/Xcode project files. Confirm the required native toolchain is actually installed before assuming a mobile build will run (Android SDK/NDK + JDK; Xcode + a provisioning profile for iOS) — report what's missing rather than failing silently partway through. A mobile dev server needs a LAN-reachable host (`devUrl`/`TAURI_DEV_HOST`) — set it deliberately and treat it like any other network-exposed local service (§A3), never bound wider than the dev machine needs.
+
+### G5. Signing, Updates & Store Distribution
+
+Desktop: Windows and macOS builds need real code-signing certificates before distribution outside a store (macOS additionally needs notarization); Linux packages are signed per the target format's convention (AppImage/deb/rpm). Mobile: Android needs a keystore for a signed release (Play Store) and iOS needs an Apple Developer certificate/provisioning profile (App Store/TestFlight) — never generate or commit a production signing key, keystore, `.p12`, or provisioning profile into the repo; treat these exactly like the credentials §A2 scans for. The Tauri updater, if used, needs its own signing keypair (`tauri signer generate`) — the private key/passphrase are secrets that never get committed; only the public key belongs in `tauri.conf.json`. Don't wire up auto-update, store publishing, or CI signing unless explicitly asked — scaffolding a Tauri app doesn't imply "ship it" (§B4).
+
+### G6. Verification
+
+After scaffolding or changing Tauri config: verify the shared frontend still runs standalone in a browser (nothing Tauri-only leaked into a code path the plain web build hits), then verify inside `tauri dev` for each requested target (desktop, and Android/iOS emulator/simulator when mobile was asked for). Use Playwright/Reticle (§D1) for the web surface when already available; for the native shell itself, a manual smoke check (app launches, the core flow works, no console/IPC permission-denied errors) stands in when the project has no Tauri-specific automated harness yet.
+
+## 📌 PART H — TRACKER ENTRY TEMPLATES
 
 Valid task formats: `feat ...` · `fix ...` · `security ...` · `update ...` · `issue ...` · `feat/fix ...` · `srs ...` · plain description.
 
@@ -459,11 +494,11 @@ Valid task formats: `feat ...` · `fix ...` · `security ...` · `update ...` ·
 > *Comment: Blocked because <specific reason>. Remaining work: <specific action>.*
 ```
 
-## 📄 PART H — ROOT README.md STRUCTURE
+## 📄 PART I — ROOT README.md STRUCTURE
 
 Applies **only when README work is explicitly requested** — writing or rewriting the root `README.md`. It is not triggered automatically just because a new project is being scaffolded. It's a **shape to follow, not text to copy verbatim** — fill every section from the real project (name, stack, modules, env vars); drop sections that plainly don't apply (no `Pricing` section for an internal tool, no `Mobile` row if there's no mobile client) rather than padding them with filler. `<domain>` throughout is the value resolved in §A8.
 
-**H1. Skeleton**
+**I1. Skeleton**
 
 ```
 <div align="center">
@@ -494,7 +529,7 @@ Applies **only when README work is explicitly requested** — writing or rewriti
 > **<ProjectName>** is <one-paragraph elevator pitch: who it's for, what it replaces, what's distinctive>.
 ```
 
-**H2. Section order**
+**I2. Section order**
 
 1. **About** — 1–2 short paragraphs: how the product is actually used end-to-end (e.g. signup → tenant provisioning → daily usage), plus any design-system link if one exists.
 2. **Features** — a flat bullet list of real, shipped capabilities, grouped loosely by area. No roadmap items, no aspirational features.
@@ -511,7 +546,7 @@ Applies **only when README work is explicitly requested** — writing or rewriti
 13. **Contributing** — point to `AGENTS.md`/`CLAUDE.md` for the real rules; don't restate Part A/B here. Include the same no-self-attribution rule from §A10.
 14. **Footer** — a short centered tagline, no fabricated claims.
 
-**H3. Rules**
+**I3. Rules**
 
 - Never invent metrics, user counts, badges for tools not actually used, or features that don't exist yet — this is a working README, not marketing copy.
 - Every folder name, domain reference, and port number must match what's actually in the repo at the time of writing; update the README in the same tracker entry as any structural change that makes it stale (new app added, folder renamed, port changed).
@@ -519,8 +554,9 @@ Applies **only when README work is explicitly requested** — writing or rewriti
 
 ## 📍 TRACKER
 
-Per §B0, this shared global file never holds a live tracker itself and intentionally has no entries below. Each project's tracker lives in that project's own root `CLAUDE.md`, seeded from the Part G templates the first time tracker work starts there.
+Per §B0, this shared global file never holds a live tracker itself and intentionally has no entries below. Each project's tracker lives in that project's own root `CLAUDE.md`, seeded from the Part H templates the first time tracker work starts there.
 
 ---
 
-Last updated: 2026-09-21 15:35 PKT (moved the live tracker out of this global file to each project's own root `CLAUDE.md` per §B0; §A8 now checks for an already-established domain — README, `package.json` homepage, DNS/env — before falling back to a repo-name guess; tightened the §A11 GitHub-username resolution order; Part H now triggers only on an explicit README request, not auto-scaffold; added header logo)
+Last updated: 2026-09-21 13:48 PKT (added Part G — Group 6: Tauri 2 desktop/mobile work, asked-only, built around one shared web codebase with Tauri 2's default-deny capabilities security model, mobile init, and signing/store distribution; old Part G/H — Tracker Entry Templates and Root README.md Structure — shifted to Part H/I accordingly, with all cross-references updated)
+
