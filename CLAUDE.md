@@ -1,12 +1,16 @@
 # CLAUDE.md
 
+<p align="center">
+  <img src="https://github.com/anthropics.png?size=96" alt="Claude" width="72" height="72" />
+</p>
+
 Generic, project-agnostic guardrails file — one copy, reused across every repo.
 
 ## How Claude Code loads this file
 
 Placed at `~/.claude/CLAUDE.md`, Claude Code loads it as your **global default** and applies it automatically to every project on this machine, even repos that don't have their own CLAUDE.md — no per-repo copy needed. (It's equally valid dropped at a single repo's root, where Claude Code auto-reads it every session — but the point of this version is that it doesn't need to be.)
 
-Nothing in this file is repo-specific: §A8 resolves `<domain>` from whatever repo it's running in, §A11 resolves the GitHub username automatically per session, and the tracker at the bottom (§B0) accumulates that project's own history the first time a real task runs against it.
+Nothing in this file is repo-specific: §A8 resolves `<domain>` from whatever repo it's running in (an already-established domain in the project always wins over a repo-name guess), §A11 resolves the GitHub username automatically per session, and per §B0 the live task tracker is never kept in this shared file — it lives in each project's own root `CLAUDE.md`, created the first time tracker work actually starts there.
 
 ## 🗂️ TABLE OF CONTENTS
 
@@ -20,7 +24,7 @@ Nothing in this file is repo-specific: §A8 resolves `<domain>` from whatever re
 | E | Group 4 — Tool / Skill Installation | asked |
 | F | Group 5 — SRS / Requirements Documentation Work | asked (+ requirement-gathering loop) |
 | G | Tracker Entry Templates | reference — lives inside this file |
-| H | Root README.md Structure | reference — applied when scaffolding a new repo |
+| H | Root README.md Structure | reference — applied only when README work is explicitly requested |
 
 ## 0️⃣ SESSION-START MENU
 
@@ -109,12 +113,13 @@ External skills, plugins, CLIs, scripts, and dev tools (including everything lis
 
 ### A8. Project Structure
 
-**Domain resolution — the repo IS the domain.** `<domain>` is never a placeholder left as `domainname.com`. Resolve it automatically, in this order, before creating any folders:
+**Domain resolution — the repo IS the domain, unless the project already says otherwise.** `<domain>` is never a placeholder left as `domainname.com`. Resolve it automatically, in this order, before creating any folders:
 
-1. Take the current repository name (from `git remote get-url origin`, or the folder name if there's no remote yet) as the base, e.g. repo `vorkspro` → `vorkspro.com`.
-2. If the repo name already looks like a domain (contains a dot, e.g. `acme-app.io`), use it as-is instead of appending `.com`.
-3. If the user has stated a different live/production domain for the project, that overrides the repo-name guess — ask once if it's genuinely unclear, don't guess a TLD silently for a real production project.
-4. Reuse the same resolved `<domain>` consistently everywhere: folder names, README badges/links (see Part H), env var defaults, CORS origins, etc. Never mix a resolved domain in one place and the literal word `domainname.com` in another.
+1. **Check for an already-established domain first.** Look at the existing `README.md` (badges/links), the `homepage` field in `package.json`, and any DNS config or `.env`/`.env.example` files that declare a production domain. If one is found there, use it as `<domain>` as-is — never override an already-established domain with a repo-name guess.
+2. If none of those exist yet, derive `<domain>` from the repo name: take the current repository name (from `git remote get-url origin`, or the folder name if there's no remote yet) as the base, e.g. repo `vorkspro` → `vorkspro.com`.
+3. If the repo name already looks like a domain (contains a dot, e.g. `acme-app.io`), use it as-is instead of appending `.com`.
+4. If it's still genuinely unclear which domain applies (conflicting signals, or a real production project with no clear domain anywhere), ask once rather than guessing a TLD silently.
+5. Reuse the same resolved `<domain>` consistently everywhere: folder names, README badges/links (see Part H), env var defaults, CORS origins, etc. Never mix a resolved domain in one place and the literal word `domainname.com` in another.
 
 Expected root folders, built from the resolved `<domain>`:
 
@@ -144,12 +149,13 @@ Maintain clear separation between API, client(s), and docs.
 
 Author = verified GitHub username only. Never a real name (unless it's also the verified username), never an email, never Claude/Cursor/ChatGPT/AI, never invented. Never assume the repo owner is automatically the author.
 
-**Resolving the username automatically** — try these in order, once per session, and reuse the result for every tracker entry that session:
+**Resolving the username automatically** — never ask up front. Try these in order, once per session, and reuse the result for every tracker entry that session:
 
-1. `gh auth status` / `gh api user --jq .login` if the GitHub CLI is installed and authenticated — this is the most reliable source.
-2. If no `gh` session, check `git config user.name` / `git config user.email` against the `git remote get-url origin` owner — only treat it as verified if it plausibly matches (e.g. the local git email resolves to a GitHub account, or the committer already appears as a contributor on the repo).
-3. If neither resolves confidently, ask the user once: "What's your GitHub username, so I can attribute tracker entries correctly?" — then reuse the answer for the rest of the session instead of asking again.
-4. If it truly can't be resolved or confirmed, use `Author: <GitHub username required>` as a placeholder rather than guessing.
+1. `gh api user --jq .login`, if `gh auth status` shows the GitHub CLI is authenticated — this is the most reliable source.
+2. If no `gh` session, take the owner segment of `git remote get-url origin` (e.g. `github.com/<owner>/<repo>`) and accept it only when it matches the local git identity — the local `git config user.email`/`user.name` resolves to that same account, or that user already appears as a contributor on the repo.
+3. If that still doesn't resolve confidently, fall back to `git config --get user.name` — but only accept it if it's already a plausible GitHub handle (no spaces, looks like a real username) rather than a full real name.
+4. Only if none of the above resolve, ask the user once: "What's your GitHub username, so I can attribute tracker entries correctly?" — then reuse the answer for the rest of the session instead of asking again.
+5. If it truly can't be resolved or confirmed even after asking, use `Author: <GitHub username required>` as a placeholder rather than guessing.
 
 ### A12. Regression Rule
 
@@ -197,7 +203,9 @@ Selecting this Group bundles the following — all apply together, no separate c
 
 ### B0. Tracker Location (Compulsory)
 
-The tracker lives **inside this same CLAUDE.md file** — in the `TRACKER` section at the very bottom, right after Part H, using the templates in Part G. Never create a separate `TRACKER.md`, `TODO.md`, `ISSUES.md`, or move tracking into GitHub Issues/Projects, unless the user explicitly asks for that instead. Every new entry is appended under the `TRACKER` heading, and `Last updated` at the bottom is bumped after each change.
+This global file is the **shared ruleset only** — it never holds a live task tracker itself. The task tracker for any given project lives in **that project's own root `CLAUDE.md`**, never a separate `TRACKER.md`/`TODO.md`/`ISSUES.md`, and never mixed into this global file, unless the user explicitly asks for GitHub Issues/Projects instead.
+
+If the project doesn't already have its own root `CLAUDE.md`, create one the first time tracker work actually starts on that project — seeded with a `📍 TRACKER` section at the bottom using the templates in Part G. Every new entry is appended under that project's `TRACKER` heading, and its own `Last updated` line is bumped after each change.
 
 ### B1. Universal Task Comment Rule
 
@@ -206,7 +214,7 @@ Every tracked task (`feat`, `fix`, `security`, `update`, `issue`, `feat/fix`, `s
 ### B2. Tracker Workflow
 
 1. Parse the request; determine type; normalize it.
-2. Find the highest existing task number; assign N + 1.
+2. Per §B0, locate that project's own root `CLAUDE.md` (creating it from Part G if it doesn't exist yet); find the highest existing task number there; assign N + 1.
 3. Add the task unchecked; immediately add its Comment.
 4. Confirm which other Group(s) this task also touches (e.g. a feature needing a new package pulls in Group 2 as well; a feature needing a spec first pulls in Group 5) and apply those bundles too.
 5. Implement only the requested work.
@@ -453,7 +461,7 @@ Valid task formats: `feat ...` · `fix ...` · `security ...` · `update ...` ·
 
 ## 📄 PART H — ROOT README.md STRUCTURE
 
-Applies whenever Claude scaffolds a new project, or is explicitly asked to (re)write the root `README.md`. It's a **shape to follow, not text to copy verbatim** — fill every section from the real project (name, stack, modules, env vars); drop sections that plainly don't apply (no `Pricing` section for an internal tool, no `Mobile` row if there's no mobile client) rather than padding them with filler. `<domain>` throughout is the value resolved in §A8.
+Applies **only when README work is explicitly requested** — writing or rewriting the root `README.md`. It is not triggered automatically just because a new project is being scaffolded. It's a **shape to follow, not text to copy verbatim** — fill every section from the real project (name, stack, modules, env vars); drop sections that plainly don't apply (no `Pricing` section for an internal tool, no `Mobile` row if there's no mobile client) rather than padding them with filler. `<domain>` throughout is the value resolved in §A8.
 
 **H1. Skeleton**
 
@@ -511,16 +519,8 @@ Applies whenever Claude scaffolds a new project, or is explicitly asked to (re)w
 
 ## 📍 TRACKER
 
-Per §B0, this section is where every project using this CLAUDE.md keeps its live task tracker — using the templates above. Append new entries below the last one; never reorder or delete completed history.
+Per §B0, this shared global file never holds a live tracker itself and intentionally has no entries below. Each project's tracker lives in that project's own root `CLAUDE.md`, seeded from the Part G templates the first time tracker work starts there.
 
 ---
 
-**feat(1): (awaiting first user feature)**
-
-> *Added: 2026-08-27 14:11 PKT*
-> *Author:*
-> *Comment: Awaiting the first user-provided feature or task.*
-
----
-
-Last updated: 2026-09-21 (added Part H — Root README.md Structure; auto-resolved `<domain>` from repo name in §A8; automatic GitHub-username resolution in §A11; explicit §B0 tracker-location rule)
+Last updated: 2026-09-21 15:35 PKT (moved the live tracker out of this global file to each project's own root `CLAUDE.md` per §B0; §A8 now checks for an already-established domain — README, `package.json` homepage, DNS/env — before falling back to a repo-name guess; tightened the §A11 GitHub-username resolution order; Part H now triggers only on an explicit README request, not auto-scaffold; added header logo)
