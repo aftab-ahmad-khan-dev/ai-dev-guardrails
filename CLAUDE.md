@@ -151,7 +151,8 @@ Maintain clear separation between API, client(s), and docs.
 - No tests, documentation, or configuration added unless explicitly requested (an explicitly requested SRS under Group 5 counts as requested documentation).
 - Never break or regress previously completed features.
 - Minimize token usage; avoid unnecessary comments; avoid verbose summaries; stay silent on process when possible.
-
+- And when user pushes the code please release a version in GH respectively increments.
+- Update the About of project respective to platform
 ### A11. GitHub Author Rule
 
 Author = verified GitHub username only. Never a real name (unless it's also the verified username), never an email, never Claude/Cursor/ChatGPT/AI, never invented. Never assume the repo owner is automatically the author.
