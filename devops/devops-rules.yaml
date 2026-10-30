@@ -1,0 +1,406 @@
+---
+meta:
+  category: devops
+  title: DevOps / CI-CD & Deployment Rules
+  version: 2.0.0
+  updated: '2026-07-21'
+  rule_id_prefix: OPS
+  purpose: Safe, repeatable pipelines and platform playbooks (EC2, DigitalOcean, Vercel, cPanel, Railway, Render) with secrets hygiene, zero-downtime, and rollback.
+  usage: 'Instruct: "Follow every devops rule and use the matching platform playbook/pipeline template."'
+  platforms:
+  - AWS EC2
+  - DigitalOcean
+  - Vercel
+  - cPanel
+  - Railway
+  - Render
+  templates_dir: devops/pipelines/
+  source: AI Dev Rules Master Prompt Pack — Part 4
+rules:
+- id: OPS-01
+  title: CI/CD Pipeline Principles
+  status: complete
+  severity: high
+  summary: Every deploy flows through an automated, reproducible pipeline. Lint + tests + build must pass before deploy.
+  rules:
+  - Pipelines reproducible with locked deps (npm ci) locally and in CI.
+  - 'Fail fast: lint → test → build → scan → deploy.'
+  - Deploy only from protected branch/tag — never arbitrary branches or fork PRs.
+  - Separate environments with promotion between them.
+  - Pipeline-as-code lives in the repo.
+  - Production deploys do not bypass code review.
+  do:
+  - Gate production behind passing checks and optional manual approval.
+  - Keep workflow YAML free of inline secrets.
+  dont:
+  - SSH in and hand-restart production.
+  - Skipping tests/audits to just ship it.
+  - Deploying from unreviewed forks.
+  ai_directive: Generate fail-fast pipelines (lint/test/build/scan/deploy) that deploy only from protected refs after review.
+- id: OPS-02
+  title: Secrets & Env Vars In Pipelines
+  status: complete
+  severity: critical
+  summary: Pipeline secrets come from the CI secret store — never committed files or plaintext YAML.
+  rules:
+  - Store secrets in GitHub Actions secrets (or equivalent).
+  - Inject as masked env at the step that needs them; never echo/log.
+  - Least-privilege deploy credentials scoped to target + environment.
+  - Prefer OIDC / short-lived cloud credentials.
+  - Never commit .env, SA JSON, or SSH keys.
+  do:
+  - Rotate deploy keys.
+  - Mask secrets in CI logs.
+  dont:
+  - Hardcoding tokens in workflow YAML.
+  - One all-powerful credential across every environment.
+  - Fork PRs with access to production secrets.
+  ai_directive: Source all pipeline secrets from the encrypted store, mask them, scope least privilege, and prefer short-lived OIDC creds.
+- id: OPS-03
+  title: AWS EC2 Deployment
+  status: complete
+  severity: high
+  summary: Deploy to EC2 via CI/SSH with reverse proxy, process manager, and zero-downtime reload.
+  rules:
+  - Hardened security group (SSH from trusted IPs only; 80/443 public).
+  - Nginx reverse proxy + TLS; app via PM2/systemd.
+  - CI over SSH with scoped deploy key; build then reload.
+  - Zero-downtime restart (pm2 reload).
+  - Secrets in SSM/Secrets Manager — not plaintext on disk.
+  - Dedicated deploy user — not root.
+  - IAM roles on instance — not long-lived access keys when avoidable.
+  do:
+  - See devops/pipelines/deploy-ec2.yml.
+  - Redirect HTTP to HTTPS.
+  dont:
+  - Open SSH to 0.0.0.0/0.
+  - Password SSH / shared root.
+  - git pull and hand-restart with downtime.
+  ai_directive: Generate EC2 deploys with hardened SG, Nginx+TLS, PM2 reload, CI-over-SSH with scoped keys, and IAM roles where possible.
+  template: devops/pipelines/deploy-ec2.yml
+- id: OPS-04
+  title: DigitalOcean Deployment
+  status: complete
+  severity: high
+  summary: Deploy Droplet (Nginx+PM2) or App Platform (git) with managed TLS and private DB networking.
+  rules:
+  - 'Droplet: mirror EC2 playbook (ufw, Nginx, TLS, PM2).'
+  - 'App Platform: connect repo, env in dashboard, auto-deploy from protected branch.'
+  - Managed DB on private networking — never public.
+  - Enable backups/snapshots.
+  - Scope DO tokens to minimum needed.
+  do:
+  - See devops/pipelines/deploy-digitalocean.yml.
+  - Separate staging/production projects.
+  dont:
+  - Exposing databases publicly.
+  - Manual file edits on Droplet without a pipeline.
+  - Committing DO tokens.
+  ai_directive: For Droplets use EC2-style hardening; for App Platform use git deploy with dashboard env vars, TLS, and private DB networking.
+  template: devops/pipelines/deploy-digitalocean.yml
+- id: OPS-05
+  title: Vercel Deployment
+  status: complete
+  severity: high
+  summary: Git-based Vercel deploys with preview environments and correctly scoped env vars.
+  rules:
+  - PRs get preview deploys; main maps to production.
+  - Env vars scoped Development/Preview/Production separately.
+  - Only public-prefixed vars reach the browser.
+  - Mark sensitive vars as Sensitive in Vercel.
+  - Explicit build/output/framework settings; vercel.json for headers/rewrites when needed.
+  - Never commit .vercel/ tokens.
+  do:
+  - See devops/pipelines/deploy-vercel.yml.
+  - Use edge/DDoS protections.
+  dont:
+  - Server secrets in NEXT_PUBLIC_/VITE_ vars.
+  - Same secrets in Preview and Production.
+  - Committing Vercel tokens.
+  ai_directive: Use Vercel git deploys with per-environment Sensitive vars, browser-safe public prefixes only, and explicit build/headers config.
+  template: devops/pipelines/deploy-vercel.yml
+- id: OPS-06
+  title: cPanel Deployment
+  status: complete
+  severity: medium
+  summary: Deploy via Git or CI SFTP/SSH using Node App or public_html correctly — never plain FTP for secrets.
+  rules:
+  - Use Setup Node.js App for Node; static builds to public_html/docroot.
+  - Deploy via Git Version Control or CI SFTP/SSH.
+  - Env vars in Node App UI — not committed files.
+  - Always SFTP (or SSH key) — never plain FTP.
+  - Disable directory listing; block public .env and VCS metadata.
+  - No chmod 777; keep software current; 2FA on cPanel account.
+  do:
+  - See devops/pipelines/deploy-cpanel.yml.
+  - Build in CI; sync only required output.
+  dont:
+  - Uploading .env or node_modules via FTP.
+  - Leaving source maps/backups publicly downloadable.
+  - World-writable permissions.
+  ai_directive: Build in CI, deploy via SFTP/Git to docroot or Node App with UI env vars. Never FTP secrets. Prefer SSH keys over passwords.
+  template: devops/pipelines/deploy-cpanel.yml
+- id: OPS-07
+  title: Railway Deployment
+  status: complete
+  severity: high
+  summary: Git/CLI deploy on Railway with service variables, private networking, and health checks.
+  rules:
+  - Build via Nixpacks/Dockerfile; bind to process.env.PORT.
+  - Variables per service/environment in dashboard — not in code.
+  - Managed DB via injected connection vars on private networking.
+  - Define start + health check.
+  - Project-scoped tokens; resource limits per service.
+  do:
+  - See devops/pipelines/deploy-railway.yml.
+  - Separate staging/production environments.
+  dont:
+  - Hardcoding DB URL or fixed ports.
+  - Exposing internal services publicly.
+  - Committing Railway tokens.
+  ai_directive: Bind to PORT, read Railway service variables, use private networking for internals, and define health checks.
+  template: devops/pipelines/deploy-railway.yml
+- id: OPS-08
+  title: Render Deployment
+  status: complete
+  severity: high
+  summary: Git auto-deploy on Render with health checks, env groups, and managed databases.
+  rules:
+  - render.yaml blueprint or dashboard service; auto-deploy from protected branch only.
+  - Bind to process.env.PORT; health check path required.
+  - Env Groups for shared config; managed Postgres/Redis connection strings.
+  - Private services for internal-only components.
+  - Treat deploy hook URLs as secrets.
+  do:
+  - See devops/pipelines/deploy-render.yml.
+  - Enable zero-downtime where plan supports.
+  dont:
+  - Hardcoding ports/URLs.
+  - Skipping health checks.
+  - Duplicating env vars instead of Env Groups.
+  ai_directive: Use render.yaml git auto-deploy, bind to PORT, configure env groups + health checks, and keep internals private.
+  template: devops/pipelines/deploy-render.yml
+- id: OPS-09
+  title: Docker Containerization
+  status: complete
+  severity: high
+  summary: Reproducible, small, secure images with no secrets in layers.
+  rules:
+  - Multi-stage builds; slim/distroless bases.
+  - Non-root user; pin digests/tags (not latest).
+  - dockerignore excludes .env/.git/secrets.
+  - Inject secrets at runtime.
+  - Scan images in CI; set CPU/memory limits.
+  do:
+  - Copy lockfiles early; npm ci for deterministic installs.
+  dont:
+  - Baking secrets into layers.
+  - Running as root.
+  - FROM *:latest in production.
+  ai_directive: Generate multi-stage non-root pinned Dockerfiles with .dockerignore, runtime secrets, and image scanning.
+- id: OPS-10
+  title: GitHub Actions Workflow Standards
+  status: complete
+  severity: high
+  summary: Consistent, secure, cached Actions workflows with least-privilege permissions.
+  rules:
+  - Pin actions to version tags or commit SHAs — never @master.
+  - Least-privilege permissions block — avoid write-all.
+  - Cache deps; use npm ci.
+  - Split jobs with clear needs; protect production environments.
+  - Prefer OIDC to long-lived cloud keys.
+  do:
+  - Review third-party actions before use.
+  - Keep secrets masked.
+  dont:
+  - "@master action refs."
+  - 'contents: write when only read needed.'
+  - echo secrets for debugging.
+  ai_directive: Pin action versions, cache deps, declare least-privilege permissions, and prefer OIDC. Never use @master or write-all casually.
+- id: OPS-11
+  title: Build & Artifact Management
+  status: complete
+  severity: medium
+  summary: Build once and promote the same artifact across environments to avoid drift.
+  rules:
+  - Versioned artifact/image per commit/tag.
+  - Promote identical build staging→prod.
+  - Store in registry with access controls.
+  - Record git SHA in runtime metadata.
+  - Do not commit dist/build to git.
+  do:
+  - Tag images with git SHA.
+  - Fail if artifact missing/checksum mismatch.
+  dont:
+  - Rebuilding separately per environment.
+  - Deploying untagged latest without traceability.
+  - Committing build artifacts.
+  ai_directive: Build a single versioned artifact, embed git SHA, and promote that same artifact across environments.
+- id: OPS-12
+  title: Zero-Downtime Deployment
+  status: complete
+  severity: high
+  summary: Release without dropping requests via rolling/blue-green + health checks + graceful shutdown.
+  rules:
+  - Prefer rolling/blue-green over stop-then-start.
+  - Gate traffic on health/readiness.
+  - Handle SIGTERM and drain connections.
+  - Keep migrations backward-compatible during rolling updates.
+  do:
+  - pm2 reload / platform rolling deploys.
+  - Expose /health and optionally /ready.
+  dont:
+  - Killing the only production process hoping restart is fast.
+  - Breaking migrations mid-rollout.
+  - Ignoring SIGTERM.
+  ai_directive: Design rolling/blue-green deploys with health checks and graceful shutdown. Keep migrations backward-compatible during rollout.
+- id: OPS-13
+  title: Rollback & Recovery
+  status: complete
+  severity: high
+  summary: Every deploy is quickly reversible to a known-good prior release.
+  rules:
+  - Retain previous artifact/image/release.
+  - One-command/one-click rollback documented for on-call.
+  - Coordinate app rollback with DB compatibility.
+  - Test rollback periodically.
+  do:
+  - Tag releases unambiguously.
+  - Automate rollback in the same tooling.
+  dont:
+  - Deploy with no retained prior artifact.
+  - Rebuilding from memory of what changed.
+  - Irreversible data deletes without backups.
+  ai_directive: Retain prior artifacts and document a tested one-command rollback for every production deploy.
+- id: OPS-14
+  title: Infrastructure as Code
+  status: complete
+  severity: medium
+  summary: Provision infra declaratively, version it, and review via PRs.
+  rules:
+  - Prefer Terraform/Pulumi/CloudFormation/platform blueprints over undocumented click-ops.
+  - Review infra changes via PRs.
+  - Secure remote state with locking — never commit secret-bearing state.
+  - Keep environments reproducible from IaC.
+  do:
+  - Plan before apply in CI.
+  - Least-privilege IAM in definitions.
+  dont:
+  - Critical prod changes only in console with no record.
+  - Committing terraform.tfstate with secrets.
+  - Undocumented manual tweaks on top of IaC.
+  ai_directive: Prefer declarative IaC in git with PR review, secured remote state, and reproducible environments.
+- id: OPS-15
+  title: Nginx Reverse Proxy & SSL
+  status: complete
+  severity: high
+  summary: Terminate TLS and reverse-proxy securely to the app.
+  rules:
+  - Proxy to internal app port; do not expose app port publicly when proxy exists.
+  - Auto-renew TLS (Let's Encrypt/ACM).
+  - Redirect HTTP to HTTPS.
+  - Set security headers at proxy or app.
+  - Sensible timeouts and client body limits.
+  do:
+  - HTTP/2 where supported.
+  - Upstream health checks when available.
+  dont:
+  - Leaving port 3000 open to the world.
+  - Expired self-signed certs on public prod.
+  - Mixed content (HTTPS page calling HTTP APIs).
+  ai_directive: Generate Nginx that proxies to the app, enforces auto-renewed TLS, redirects HTTP to HTTPS, and keeps the app port private.
+- id: OPS-16
+  title: Process Management (PM2 / systemd)
+  status: complete
+  severity: medium
+  summary: Keep the app running under a supervisor with autorestart, logs, and start-on-boot.
+  rules:
+  - Run under PM2 or systemd — not a bare SSH shell.
+  - Autorestart on crash; enable start on boot.
+  - Capture logs with rotation.
+  - Prefer reload over hard restart when possible.
+  - Commit ecosystem.config / unit file as source of truth.
+  do:
+  - Set NODE_ENV via supervisor.
+  - Do not run as root without justification.
+  dont:
+  - node server.js in screen/tmux as production.
+  - Disabling restart-on-failure permanently.
+  ai_directive: Run services under PM2/systemd with autorestart, rotated logs, and start-on-boot. Prefer reload for zero-downtime.
+- id: OPS-17
+  title: Database Migrations In Pipeline
+  status: complete
+  severity: high
+  summary: Run migrations as a gated, reversible pipeline step — not on every boot.
+  rules:
+  - Explicit gated migrate step in deploy pipelines.
+  - Backward-compatible expand/contract during rolling deploys.
+  - Keep down migrations when safe.
+  - Never auto-run destructive migrations on app boot in production.
+  - Verify backups before risky migrations.
+  do:
+  - Fail deploy if migrate fails.
+  - Separate expand and contract across releases.
+  dont:
+  - Dropping columns still read by old instances mid-rollout.
+  - migrate on every pod start (races).
+  - Unreviewed hand SQL on production.
+  ai_directive: Run migrations as a gated, backward-compatible pipeline step with rollback awareness. Never destructive boot-time migrations.
+- id: OPS-18
+  title: Monitoring & Alerting
+  status: complete
+  severity: medium
+  summary: Observe health and get alerted on downtime, errors, and saturation.
+  rules:
+  - External uptime checks on health endpoints.
+  - Track error rate, latency, CPU/memory/disk.
+  - Actionable alerts with owners/runbooks.
+  - Wire error tracking without logging secrets.
+  - Include deploy markers to correlate releases with incidents.
+  do:
+  - Define light SLOs for availability/latency.
+  - Alert on sustained 5xx and failed health checks.
+  dont:
+  - Deploy with zero visibility.
+  - Noisy alerts nobody acts on.
+  - Discovering outages only from user complaints.
+  ai_directive: Include health checks, metrics/error monitoring, deploy markers, and actionable alerts for every production service.
+- id: OPS-19
+  title: Logging & Log Rotation
+  status: complete
+  severity: medium
+  summary: Centralize structured logs and rotate local logs so disks do not fill.
+  rules:
+  - Structured app logs shipped to a central store when available.
+  - Rotate/size-limit local logs (logrotate/PM2).
+  - Redact secrets/PII.
+  - Retain per policy; monitor disk on VPS hosts.
+  - Include request IDs for correlation.
+  do:
+  - Set explicit retention.
+  - Avoid SSH-and-tail as sole observability.
+  dont:
+  - Unbounded logs filling root volume.
+  - Logging credentials/tokens.
+  - No centralization for multi-instance fleets.
+  ai_directive: Centralize structured logs, rotate local files, monitor disk, and never log secrets.
+- id: OPS-20
+  title: Backup & Disaster Recovery
+  status: complete
+  severity: high
+  summary: Automate off-site backups, test restores, and document RPO/RTO.
+  rules:
+  - Scheduled automated DB/file backups.
+  - Store off-site in a separate failure domain.
+  - Encrypt backups; restrict restore permissions.
+  - Periodically test restores.
+  - Document RPO/RTO and keep a short restore runbook.
+  - Alert on backup failures.
+  do:
+  - Use managed backup features when available.
+  - Verify success monitoring.
+  dont:
+  - Assuming the platform backs everything up without verification.
+  - Only on-disk snapshots on the same server.
+  - Never testing a restore until an emergency.
+  ai_directive: Automate encrypted off-site backups, alert on failures, periodically test restores, and document RPO/RTO.
